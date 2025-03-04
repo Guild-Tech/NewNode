@@ -2,6 +2,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreditCard, Wallet } from "lucide-react";
 import CryptoPayment from "./CryptoPayment";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(
+  "pk_test_51QnhLvFHwL9JgzZgyBAw7V9SpqZOb5U4ZTj0Rj9Iybcw7KXpWWQ8EbzLhHf8sElzq6JAvlXzBZStaI0kKqKF0W0s00VfB19zSK"
+);
 
 interface PaymentOptionsProps {
   amount: number;
@@ -14,43 +20,46 @@ export default function PaymentOptions({ amount, onSuccess }: PaymentOptionsProp
   const [email, setEmail] = useState(""); // Capture user email
 
   const handleCardPayment = async () => {
+    if (!email) {
+      alert("Please enter your email before proceeding.");
+      return;
+    }
+  
     setProcessing(true);
     setSelectedMethod("card");
-
+  
     try {
-      // Call your backend endpoint to create a Stripe Checkout session.
-      const response = await fetch("http://node-307s.onrender.com/api/create-checkout-session", {
+      const response = await fetch("https://node-307s.onrender.com/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customer_email: email || "customer@example.com", // Use entered email or default
+          customer_email: email, // Ensure the email is passed correctly
           line_items: [
             {
               price_data: {
                 currency: "usd",
                 product_data: { name: "Custom Product" },
-                unit_amount: amount * 100, // Stripe expects the amount in cents
+                unit_amount: amount * 100, // Amount must be in cents
               },
               quantity: 1,
             },
           ],
         }),
-        redirect: "manual",
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to create checkout session");
       }
-
+  
       const { url } = await response.json();
-      // Redirect the user to Stripe Checkout
-      window.location.href = url;
+      window.location.href = url; // Redirect user to Stripe Checkout
     } catch (error) {
       console.error("Payment failed:", error);
       alert("An error occurred while processing the payment.");
     }
     setProcessing(false);
   };
+  
 
   return (
     <div className="space-y-6">
