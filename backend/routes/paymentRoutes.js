@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")("sk_test_51QnhLvFHwL9JgzZgJT6Jnw2kXU3b2fEVHirdxoKgJ9OEsv0sh39fjAsJtz47HYYnhlBWvMQTRMeFy1Ghun5rg2JW00OCibNoa4");
 const Order = require("../models/Order");
 
 const YOUR_DOMAIN = "http://localhost:5173";
@@ -10,6 +10,8 @@ const YOUR_DOMAIN = "http://localhost:5173";
 router.post("/create-checkout-session", async (req, res) => {
   try {
     const { line_items, customer_email } = req.body;
+    console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY);
+
 
     if (!line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return res.status(400).json({ message: "Invalid product details" });
@@ -56,3 +58,5 @@ router.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ message: "Error creating checkout session" });
   }
 });
+
+module.exports = router;
