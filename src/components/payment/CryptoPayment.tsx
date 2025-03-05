@@ -40,7 +40,7 @@ export default function CryptoPayment({
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      "price_amount": 90,
+      "price_amount": amount,
       "price_currency": "usd",
       "order_id": `${order_id.toString()}`,
       "order_description": `${order_description.toString()}`,
