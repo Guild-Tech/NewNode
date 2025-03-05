@@ -12,10 +12,10 @@ export interface Product {
   price: number;
   image: string;
   specs: {
-    defaultSoftware: string;
-    defaultRam: string;
-    defaultStorage: string;
-    defaultProcessor: string;
+    software: string;
+    ram: string;
+    storage: string;
+    processor: string;
   };
 }
 

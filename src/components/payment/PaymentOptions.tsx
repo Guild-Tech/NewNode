@@ -2,12 +2,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreditCard, Wallet } from "lucide-react";
 import CryptoPayment from "./CryptoPayment";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from '@stripe/react-stripe-js';
+// import { loadStripe } from "@stripe/stripe-js";
+// import { Elements } from '@stripe/react-stripe-js';
 
-const stripePromise = loadStripe(
-  "pk_test_51QnhLvFHwL9JgzZgyBAw7V9SpqZOb5U4ZTj0Rj9Iybcw7KXpWWQ8EbzLhHf8sElzq6JAvlXzBZStaI0kKqKF0W0s00VfB19zSK"
-);
+// const stripePromise = loadStripe(
+//   "pk_test_51QnhLvFHwL9JgzZgyBAw7V9SpqZOb5U4ZTj0Rj9Iybcw7KXpWWQ8EbzLhHf8sElzq6JAvlXzBZStaI0kKqKF0W0s00VfB19zSK"
+// );
 
 interface PaymentOptionsProps {
   amount: number;
@@ -123,6 +123,7 @@ export default function PaymentOptions({ amount, onSuccess }: PaymentOptionsProp
           >
             <CryptoPayment
               amount={amount}
+              email={email}
               onSuccess={onSuccess}
               onError={() => alert("Crypto payment failed")}
             />

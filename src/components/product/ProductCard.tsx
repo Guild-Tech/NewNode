@@ -16,9 +16,9 @@ export default function ProductCard({ product, index }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [config, setConfig] = useState<NodeConfig>({
     software: 'Dappnode',
-    ram: product.specs.defaultRam as NodeConfig['ram'],
-    storage: product.specs.defaultStorage as NodeConfig['storage'],
-    processor: product.specs.defaultProcessor as NodeConfig['processor']
+    ram: product.specs.ram as NodeConfig['ram'],
+    storage: product.specs.storage as NodeConfig['storage'],
+    processor: product.specs.processor as NodeConfig['processor']
   });
   const [show3D, setShow3D] = useState(false);
 
@@ -26,7 +26,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
     addItem(product, config);
   };
 
-  const price = calculatePrice(product.basePrice, config);
+  const price = calculatePrice(product.price, config);
 
   return (
     <motion.div
