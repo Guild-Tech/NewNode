@@ -1,7 +1,8 @@
-// backend/config/database.js
-const mongoose = require('mongoose');
+const session = require("express-session"); // Import express-session
+const MongoDBStore = require("connect-mongodb-session")(session);
 
-mongoose.connect("mongodb+srv://guildtechnology0:AGNKDFi6644ZkkEd@cluster0.tdauz.mongodb.net/Node", {
+const mongoose = require('mongoose');
+mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 20000,
 })
   .then(() => console.log('✅ MongoDB connected'))

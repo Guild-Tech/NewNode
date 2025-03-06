@@ -9,10 +9,9 @@ import Product3DView from './Product3DView';
 
 interface ProductCardProps {
   product: Product;
-  index: number;
 }
 
-export default function ProductCard({ product, index }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [config, setConfig] = useState<NodeConfig>({
     software: 'Dappnode',
@@ -32,7 +31,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
       className="bg-white rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300"
     >
       <div className="relative overflow-hidden">

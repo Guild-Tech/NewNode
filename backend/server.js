@@ -1,16 +1,15 @@
 const dotenv = require('dotenv');
-dotenv.config(); // Loads your .env file
+dotenv.config({ path: './process.env' }); // Loads .env
 
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const session = require("express-session");
+const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
-// Initialize the app
 const app = express();
 
-// Connect to MongoDB (database connection setup)
+// Connect to MongoDB
 require('./config/database');
 
 // Middleware setup
@@ -32,7 +31,7 @@ app.use(cors({
 
 // Set up MongoDB session store
 const store = new MongoDBStore({
-  uri: "mongodb+srv://guildtechnology0:AGNKDFi6644ZkkEd@cluster0.tdauz.mongodb.net/Node",
+  uri: process.env.MONGO_URI + 'Node',
   collection: 'sessions',
 });
 
@@ -45,9 +44,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production", // secure in production
+    secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'strict',
   }
 }));
 
@@ -56,13 +55,16 @@ const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const paymentRouter = require('./routes/paymentRoutes');
-// If you have webhook routes, import and mount them appropriately
+const webhookRoutes = require('./routes/webhook');
 
-// Define routes
+// Define other routes
 app.use("/api", productRoutes);
 app.use("/api", orderRoutes);
 app.use("/api", paymentRouter);
 app.use("/admin", adminRoutes);
+
+// Mount webhook route using raw body middleware
+app.use("/api/stripe-webhook", express.raw({ type: "application/json" }), webhookRoutes);
 
 // Root route
 app.get('/', (req, res) => {
