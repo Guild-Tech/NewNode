@@ -45,7 +45,7 @@ export default function CryptoPayment({
 
     try {
       const response = await fetch(
-        "http://localhost:4000/api/create-crypto-payment",
+        `${import.meta.env.VITE_API_URL}/create-crypto-payment`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

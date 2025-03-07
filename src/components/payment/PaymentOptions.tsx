@@ -41,7 +41,7 @@ export default function PaymentOptions({ amount, onSuccess, shipmentData }: Paym
     setProcessing(true);
 
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL + "/create-checkout-session", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
