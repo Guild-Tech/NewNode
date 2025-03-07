@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useState } from "react";
 // import { useWeb3Modal } from '@web3modal/react';
-import { useAccount } from 'wagmi';
+import { useAccount } from "wagmi";
 //import DePay from '@depay/web3-payments';
-import { Wallet, AlertCircle } from 'lucide-react';
-import { retrieveSystemInfoAsText } from '../../utils/convert to plainaText';
-import { useCartStore } from '../../store/cartStore';
-import { v4 as uuidv4 } from 'uuid';
+import { Wallet, AlertCircle, Currency } from "lucide-react";
+import { retrieveSystemInfoAsText } from "../../utils/convert to plainaText";
+import { useCartStore } from "../../store/cartStore";
+import { v4 as uuidv4 } from "uuid";
+import { ShipmentFormData } from "./ShipmentDetails";
 
 interface CryptoPaymentProps {
   amount: number;
   email: string;
+  shippingDetails: ShipmentFormData | null; // Add this prop
+  shipmentData: ShipmentFormData;
   onSuccess: () => void;
   onError: (error: string) => void;
 }
@@ -17,62 +20,83 @@ interface CryptoPaymentProps {
 export default function CryptoPayment({
   amount,
   email,
+  shippingDetails,
+  shipmentData,
   onSuccess,
   onError,
 }: CryptoPaymentProps) {
   // const { open } = useWeb3Modal();
   // const { isConnected } = useAccount();
-  const [invoice_url, setInvoiceUrl] = useState<{ invoice_url: string, message: string }>();
+  const [invoice_url, setInvoiceUrl] = useState<{
+    invoice_url: string;
+    message: string;
+  }>();
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, getTotalPrice } = useCartStore();
   const [error, setError] = useState(false);
-  const order_description = (`${retrieveSystemInfoAsText(items)}Total Price: ${getTotalPrice()}`)
+  const order_description = `${retrieveSystemInfoAsText(
+    items
+  )}Total Price: ${getTotalPrice()}`;
   const order_id = uuidv4();
 
-  const handlePayment = () => {
+  const handleCryptoPayment = async () => {
     setIsProcessing(true);
     setError(false);
 
+    try {
+      const response = await fetch(
+        "http://localhost:4000/api/create-crypto-payment",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer_email: email,
+            order_description,
+            shipping_details: shippingDetails,
+            price_currency: "ETH",
+            pay_currency: "ETH",
+            customer: {
+              name: `${shipmentData?.firstName} ${shipmentData?.lastName}`,
+              email: shipmentData?.email,
+              phone: shipmentData?.phone,
+            },
+            line_items: [
+              {
+                price_data: {
+                  product_data: { name: "Product Name" },
+                  unit_amount: amount * 100,
+                },
+                quantity: 1,
+              },
+            ],
+          }),
+        }
+      );
 
-    // Initialize DePay Widget
-    var myHeaders = new Headers();
-    myHeaders.append("x-api-key", import.meta.env.VITE_PAYMENT_API);
-    myHeaders.append("Content-Type", "application/json");
-
-    var raw = JSON.stringify({
-      "price_amount": amount,
-      "price_currency": "usd",
-      "order_id": `${order_id.toString()}`,
-      "order_description": `${order_description.toString()}`,
-      "ipn_callback_url": "https://nowpayments.io",
-      "success_url": "https://nowpayments.io",
-      "cancel_url": "https://nowpayments.io",
-      "customer_email": `${email.toString()}`,
-      // "name": `${name}`,
-    });
-
-    var requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
-    };
-
-    fetch("https://api.nowpayments.io/v1/invoice", requestOptions as any)
-      .then(response => response.json())
-      .then(result => {
-        setInvoiceUrl(result);
-        setIsProcessing(false);
-        console.log(result)
-      })
-      .catch(error => {
+      let data;
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (error) {
+        console.error("Invalid JSON response:", text);
         setError(true);
-        console.log('error', error)
-        // alert(error?.message || 'Something went wrong. Please try again.');
+        return;
+      }
+
+      setInvoiceUrl({
+        invoice_url: data.url,
+        message: "Redirecting to payment page",
+        payment_id: data.payment_id,
       });
+    } catch (err) {
+      setError(true);
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  console.log(invoice_url)
+  console.log(invoice_url);
 
   return (
     <div className="p-6 border rounded-lg">
@@ -95,27 +119,41 @@ export default function CryptoPayment({
 
       {invoice_url?.invoice_url ? (
         <>
-          <a target='_blank' href={`${invoice_url?.invoice_url}`} className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2">Continue</a>
-          <span className="text-xs text-gray-500">you will be redirected to the payment page</span>
+          <a
+            target="_blank"
+            href={`${invoice_url?.invoice_url}`}
+            className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            Continue
+          </a>
+          <span className="text-xs text-gray-500">
+            you will be redirected to the payment page
+          </span>
         </>
-      ) : <button
-        onClick={handlePayment}
-        disabled={isProcessing || !email}
-        className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-      >
-        {isProcessing ? (
-          <>
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-            <span>Processing...</span>
-          </>
-        ) : (
-          <>
-            <Wallet className="h-5 w-5" />
-            <span>{"Pay with Crypto"}</span>
-            {error && <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-500 opacity-75">{invoice_url?.message}</span>}
-          </>
-        )}
-      </button>}
+      ) : (
+        <button
+          onClick={handleCryptoPayment}
+          disabled={isProcessing || !email}
+          className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+        >
+          {isProcessing ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+              <span>Processing...</span>
+            </>
+          ) : (
+            <>
+              <Wallet className="h-5 w-5" />
+              <span>{"Pay with Crypto"}</span>
+              {error && (
+                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-500 opacity-75">
+                  {invoice_url?.message}
+                </span>
+              )}
+            </>
+          )}
+        </button>
+      )}
 
       <div className="mt-4 text-sm text-gray-500">
         <p>Accepted tokens:</p>

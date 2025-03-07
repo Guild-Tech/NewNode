@@ -6,18 +6,43 @@ const Order = require("../models/Order");
 
 const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
 const NOWPAYMENTS_API_URL = process.env.NOWPAYMENTS_API_URL;
-const YOUR_DOMAIN = "process.env.DOMAIN";
+const YOUR_DOMAIN = process.env.DOMAIN;
 
 // Route to create a NowPayments crypto payment
 router.post("/create-crypto-payment", async (req, res) => {
   try {
-    const { amount, currency, customer_email, order_description } = req.body;
-
-    if (!amount || !currency || !customer_email) {
-      return res.status(400).json({ message: "Invalid payment details" });
-    }
+    const { line_items, order_description, customer, shippingDetails } =
+      req.body;
 
     const orderID = "CRYPTO-" + Date.now();
+
+    const email =
+      req.body.customer_email ||
+      req.body.shipping_details?.email ||
+      nowPaymentsResponse?.customer_email;
+
+    if (!email) {
+      console.error("Error: Email is missing from the request or response.");
+      return res
+        .status(400)
+        .json({ error: "Email is required for processing." });
+    }
+
+    console.log("Extracted Email:", email);
+
+    const totalAmount =
+      line_items.reduce((sum, item) => {
+        if (
+          !item ||
+          !item.price_data ||
+          typeof item.price_data.unit_amount !== "number"
+        ) {
+          console.error("Invalid item structure:", item);
+          return sum; // Skip invalid items
+        }
+
+        return sum + item.price_data.unit_amount * (item.quantity || 1);
+      }, 0) / 100;
 
     console.log("Received Crypto Payment Data:", req.body);
 
@@ -26,14 +51,16 @@ router.post("/create-crypto-payment", async (req, res) => {
       orderID,
       order_description,
       shippingInfo: shippingDetails,
+      customer: {
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+      },
       totalPrice: totalAmount,
       orderStatus: "Pending",
       warranty: "2 years",
       shippingPolicy: "Free shipping on orders above $500",
       customerSupport: "24/7 Customer support via Live chat and Telegram",
-      totalPrice: amount,
-      orderStatus: "Pending",
-      paymentGateway: "NowPayments",
     });
 
     const savedOrder = await order.save();
@@ -42,19 +69,19 @@ router.post("/create-crypto-payment", async (req, res) => {
     const paymentResponse = await axios.post(
       `${NOWPAYMENTS_API_URL}/payment`,
       {
-        price_amount: amount,
-        price_currency: currency,
-        pay_currency: "BTC", // Default to Bitcoin (you can change this)
+        price_amount: totalAmount,
+        price_currency: "ETH",
+        pay_currency: "ETH",
         ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
         order_id: savedOrder._id.toString(),
         order_description,
-        customer_email,
+        customer_email: email,
         success_url: `${YOUR_DOMAIN}/success`,
         cancel_url: `${YOUR_DOMAIN}/canceled`,
       },
       {
         headers: {
-          "x-api-key": NOWPAYMENTS_API_KEY,
+          "x-api-key": process.env.NOWPAYMENTS_API_KEY,
           "Content-Type": "application/json",
         },
       }
@@ -63,7 +90,9 @@ router.post("/create-crypto-payment", async (req, res) => {
     console.log("NowPayments Response:", paymentResponse.data);
 
     if (!paymentResponse.data || !paymentResponse.data.invoice_url) {
-      return res.status(500).json({ message: "Failed to create crypto payment" });
+      return res
+        .status(500)
+        .json({ message: "Failed to create crypto payment" });
     }
 
     // Save the payment ID
@@ -73,7 +102,9 @@ router.post("/create-crypto-payment", async (req, res) => {
     res.json({ url: paymentResponse.data.invoice_url });
   } catch (error) {
     console.error("Crypto Payment Error:", error);
-    res.status(500).json({ message: "Error creating crypto payment", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating crypto payment", error: error.message });
   }
 });
 
