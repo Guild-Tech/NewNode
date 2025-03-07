@@ -1,22 +1,19 @@
 import { useState } from 'react';
 // import { useWeb3Modal } from '@web3modal/react';
-import { useAccount } from 'wagmi';
 //import DePay from '@depay/web3-payments';
-import { Wallet, AlertCircle } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { retrieveSystemInfoAsText } from '../../utils/convert to plainaText';
 import { useCartStore } from '../../store/cartStore';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CryptoPaymentProps {
   amount: number;
-  email: string;
   onSuccess: () => void;
   onError: (error: string) => void;
 }
 
 export default function CryptoPayment({
   amount,
-  email,
   onSuccess,
   onError,
 }: CryptoPaymentProps) {
@@ -47,7 +44,7 @@ export default function CryptoPayment({
       "ipn_callback_url": "https://nowpayments.io",
       "success_url": "https://nowpayments.io",
       "cancel_url": "https://nowpayments.io",
-      "customer_email": `${email.toString()}`,
+      // "customer_email": `${email.toString()}`,
       // "name": `${name}`,
     });
 
@@ -100,7 +97,7 @@ export default function CryptoPayment({
         </>
       ) : <button
         onClick={handlePayment}
-        disabled={isProcessing || !email}
+        disabled={isProcessing}
         className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
       >
         {isProcessing ? (
