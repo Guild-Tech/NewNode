@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-dotenv.config({ path: './process.env' }); // Loads .env
+dotenv.config(); // Loads .env
 
 const express = require("express");
 const cors = require("cors");
