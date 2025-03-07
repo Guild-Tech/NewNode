@@ -9,7 +9,7 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 // Route to create a Stripe checkout session
 router.post("/create-checkout-session", async (req, res) => {
   try {
-    const { line_items, order_description, shippingDetails } = req.body;
+    const { line_items, order_description, customer, shippingDetails } = req.body;
 
     if (!line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return res.status(400).json({ message: "Invalid product details" });
@@ -38,6 +38,7 @@ router.post("/create-checkout-session", async (req, res) => {
       orderID,
       order_description,
       shippingInfo: shippingDetails,
+      customer: customer,
       totalPrice: totalAmount,
       orderStatus: "Pending",
       warranty: "2 years",
@@ -86,7 +87,7 @@ router.post(
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_SECRET
+        env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
       console.error("Webhook signature verification failed:", err.message);

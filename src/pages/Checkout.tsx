@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import ShipmentDetails from '../components/checkout/ShipmentDetails';
+import ShipmentDetails from '../components/payment/ShipmentDetails';
 import PaymentMethods from '../components/checkout/PaymentMethods';
 import OrderPreview from '../components/checkout/OrderPreview';
 import { useCartStore } from '../store/cartStore';

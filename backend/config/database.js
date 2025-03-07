@@ -1,5 +1,4 @@
-const session = require("express-session"); // Import express-session
-const MongoDBStore = require("connect-mongodb-session")(session);
+const session = require("express-session");
 
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI, {
