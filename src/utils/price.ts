@@ -8,15 +8,11 @@ export function calculatePrice(basePrice: number, config: { software?: string; r
     processor = "Intel i3" 
   } = config;
 
-  console.log("Config values in calculatePrice:", { software, ram, storage, processor });
-
   const ramPrice = RAM_OPTIONS[ram]?.price || 0;
   const storagePrice = STORAGE_OPTIONS[storage]?.price || 0;
   const processorPrice = PROCESSOR_OPTIONS[processor]?.price || 0;
 
-  const totalPrice = 500 + ramPrice + storagePrice + processorPrice;
-
-  console.log("Final calculated price:", totalPrice);
+  const totalPrice = basePrice + ramPrice + storagePrice + processorPrice;
 
   return totalPrice;
 }

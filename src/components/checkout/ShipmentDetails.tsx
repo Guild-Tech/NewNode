@@ -36,8 +36,7 @@ export default function ShipmentDetails({ onSubmit }: ShipmentDetailsProps) {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (

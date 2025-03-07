@@ -2,12 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CreditCard, Wallet } from "lucide-react";
 import CryptoPayment from "./CryptoPayment";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from '@stripe/react-stripe-js';
-
-const stripePromise = loadStripe(
-  "pk_test_51QnhLvFHwL9JgzZgyBAw7V9SpqZOb5U4ZTj0Rj9Iybcw7KXpWWQ8EbzLhHf8sElzq6JAvlXzBZStaI0kKqKF0W0s00VfB19zSK"
-);
+import { retrieveSystemInfoAsText } from '../../utils/convert to plainaText';
+import { useCartStore } from '../../store/cartStore';
 
 interface PaymentOptionsProps {
   amount: number;
@@ -18,6 +14,8 @@ export default function PaymentOptions({ amount, onSuccess }: PaymentOptionsProp
   const [selectedMethod, setSelectedMethod] = useState<"card" | "crypto" | null>(null);
   const [processing, setProcessing] = useState(false);
   const [email, setEmail] = useState(""); // Capture user email
+  const { items, getTotalPrice } = useCartStore();
+  const order_description = (`${retrieveSystemInfoAsText(items)}Total Price: ${getTotalPrice()}`)
 
   const handleCardPayment = async () => {
     if (!email) {
@@ -29,17 +27,20 @@ export default function PaymentOptions({ amount, onSuccess }: PaymentOptionsProp
     setSelectedMethod("card");
   
     try {
-      const response = await fetch("http://localhost:4000/api/create-checkout-session", {
+      const response = await fetch(import.meta.env.VITE_API_URL + "/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer_email: email, // Ensure the email is passed correctly
+          order_description: `${order_description.toString()}`,
           line_items: [
             {
               price_data: {
-                currency: "usd",
-                product_data: { name: "Custom Product" },
-                unit_amount: amount * 100, // Amount must be in cents
+                currency: 'usd',
+                product_data: {
+                  name: 'Product Name',
+                },
+                unit_amount: amount * 100,
               },
               quantity: 1,
             },

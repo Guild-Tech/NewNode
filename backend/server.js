@@ -54,13 +54,15 @@ app.use(session({
 const productRoutes = require("./routes/productRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const paymentRouter = require('./routes/paymentRoutes');
+const StripePaymentRouter = require('./routes/StripePaymentRoutes');
+const NowPaymentsRouter = require('./routes/CryptoPaymentRoutes');
 const webhookRoutes = require('./routes/webhook');
 
 // Define other routes
 app.use("/api", productRoutes);
 app.use("/api", orderRoutes);
-app.use("/api", paymentRouter);
+app.use("/api", StripePaymentRouter);
+app.use("/api", NowPaymentsRouter);
 app.use("/admin", adminRoutes);
 
 // Mount webhook route using raw body middleware

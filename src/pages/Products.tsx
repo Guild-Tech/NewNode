@@ -27,7 +27,6 @@ export default function Products() {
   useEffect(() => {
     fetcher("/products")
       .then((res) => {
-        console.log("Fetched products:", res); // Debugging
         if (Array.isArray(res)) {
           setProducts(res);
         } else {
