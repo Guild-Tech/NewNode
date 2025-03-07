@@ -23,7 +23,7 @@ router.post("/create-crypto-payment", async (req, res) => {
 
     // Create an order with pending status
     const order = new Order({
-     orderID,
+      orderID,
       order_description,
       shippingInfo: shippingDetails,
       totalPrice: totalAmount,
@@ -32,7 +32,6 @@ router.post("/create-crypto-payment", async (req, res) => {
       shippingPolicy: "Free shipping on orders above $500",
       customerSupport: "24/7 Customer support via Live chat and Telegram",
       totalPrice: amount,
-      currency,
       orderStatus: "Pending",
       paymentGateway: "NowPayments",
     });
