@@ -154,6 +154,7 @@ export default function PaymentOptions({ amount, onSuccess, shipmentData }: Paym
           {selectedMethod === "crypto" && (
             <CryptoPayment
               amount={amount}
+              email={email}
               onSuccess={onSuccess}
               onError={() => alert("Crypto payment failed")}
             />

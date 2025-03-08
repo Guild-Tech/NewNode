@@ -4,16 +4,18 @@ import { useState } from 'react';
 import { Wallet } from 'lucide-react';
 import { retrieveSystemInfoAsText } from '../../utils/convert to plainaText';
 import { useCartStore } from '../../store/cartStore';
-import { v4 as uuidv4 } from 'uuid';
+
 
 interface CryptoPaymentProps {
   amount: number;
+  email: string;
   onSuccess: () => void;
   onError: (error: string) => void;
 }
 
 export default function CryptoPayment({
   amount,
+  email,
   onSuccess,
   onError,
 }: CryptoPaymentProps) {
@@ -23,51 +25,41 @@ export default function CryptoPayment({
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, getTotalPrice } = useCartStore();
   const [error, setError] = useState(false);
-  const order_description = (`${retrieveSystemInfoAsText(items)}Total Price: ${getTotalPrice()}`)
-  const order_id = uuidv4();
+  const order_description = (`${retrieveSystemInfoAsText(items)} Total Price: ${getTotalPrice()}`)
+  // const order_id = uuidv4();
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     setIsProcessing(true);
     setError(false);
+    console.log("response")
 
-
-    // Initialize DePay Widget
-    var myHeaders = new Headers();
-    myHeaders.append("x-api-key", import.meta.env.VITE_PAYMENT_API);
-    myHeaders.append("Content-Type", "application/json");
-
-    var raw = JSON.stringify({
-      "price_amount": amount,
-      "price_currency": "usd",
-      "order_id": `${order_id.toString()}`,
-      "order_description": `${order_description.toString()}`,
-      "ipn_callback_url": "https://nowpayments.io",
-      "success_url": "https://nowpayments.io",
-      "cancel_url": "https://nowpayments.io",
-      // "customer_email": `${email.toString()}`,
-      // "name": `${name}`,
-    });
-
-    var requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
-    };
-
-    fetch("https://api.nowpayments.io/v1/invoice", requestOptions as any)
-      .then(response => response.json())
-      .then(result => {
-        setInvoiceUrl(result);
-        setIsProcessing(false);
-        console.log(result)
-      })
-      .catch(error => {
-        setError(true);
-        console.log('error', error)
-        // alert(error?.message || 'Something went wrong. Please try again.');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/create-crypto-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          currency: "USD",
+          customer_email: email,
+          order_description: order_description,
+        }),
       });
+      console.log(response)
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create payment");
+      }
+
+      setInvoiceUrl(data.url);
+    } catch (err) {
+      setError(true);
+      console.error(err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
 
   console.log(invoice_url)
 
@@ -90,29 +82,15 @@ export default function CryptoPayment({
         </div>
       )} */}
 
-      {invoice_url?.invoice_url ? (
-        <>
-          <a target='_blank' href={`${invoice_url?.invoice_url}`} className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2">Continue</a>
-          <span className="text-xs text-gray-500">you will be redirected to the payment page</span>
-        </>
-      ) : <button
-        onClick={handlePayment}
-        disabled={isProcessing}
-        className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-      >
-        {isProcessing ? (
-          <>
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-            <span>Processing...</span>
-          </>
-        ) : (
-          <>
-            <Wallet className="h-5 w-5" />
-            <span>{"Pay with Crypto"}</span>
-            {error && <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-500 opacity-75">{invoice_url?.message}</span>}
-          </>
-        )}
-      </button>}
+      {invoice_url !== undefined ? (
+        <a href={"invoice_url"} target="_blank" rel="noopener noreferrer" className="btn-primary">
+          Proceed to Payment
+        </a>
+      ) : (
+        <button onClick={handlePayment} disabled={isProcessing || !email} className="btn-primary">
+          {isProcessing ? "Processing..." : "Pay with Crypto"}
+        </button>
+      )}
 
       <div className="mt-4 text-sm text-gray-500">
         <p>Accepted tokens:</p>
