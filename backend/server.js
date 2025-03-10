@@ -29,6 +29,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"],
   methods: ["GET", "POST", "PUT", "DELETE"],
 }));
+app.use(express.json());
 
 // Set up MongoDB session store
 const store = new MongoDBStore({

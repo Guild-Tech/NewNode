@@ -1,8 +1,5 @@
 import { useState } from "react";
-// import { useWeb3Modal } from '@web3modal/react';
-import { useAccount } from "wagmi";
-//import DePay from '@depay/web3-payments';
-import { Wallet, AlertCircle, Currency } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { retrieveSystemInfoAsText } from "../../utils/convert to plainaText";
 import { useCartStore } from "../../store/cartStore";
 import { v4 as uuidv4 } from "uuid";
@@ -11,8 +8,7 @@ import { ShipmentFormData } from "./ShipmentDetails";
 interface CryptoPaymentProps {
   amount: number;
   email: string;
-  shippingDetails: ShipmentFormData | null; // Add this prop
-  shipmentData: ShipmentFormData;
+  shippingDetails: ShipmentFormData | null;
   onSuccess: () => void;
   onError: (error: string) => void;
 }
@@ -21,12 +17,9 @@ export default function CryptoPayment({
   amount,
   email,
   shippingDetails,
-  shipmentData,
   onSuccess,
   onError,
 }: CryptoPaymentProps) {
-  // const { open } = useWeb3Modal();
-  // const { isConnected } = useAccount();
   const [invoice_url, setInvoiceUrl] = useState<{
     invoice_url: string;
     message: string;
@@ -34,6 +27,8 @@ export default function CryptoPayment({
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, getTotalPrice } = useCartStore();
   const [error, setError] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState("ETH"); // Default ETH
+
   const order_description = `${retrieveSystemInfoAsText(
     items
   )}Total Price: ${getTotalPrice()}`;
@@ -51,14 +46,18 @@ export default function CryptoPayment({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             customer_email: email,
+            pay_currency: selectedCurrency,
             order_description,
-            shipping_details: shippingDetails,
-            price_currency: "ETH",
-            pay_currency: "ETH",
-            customer: {
-              name: `${shipmentData?.firstName} ${shipmentData?.lastName}`,
-              email: shipmentData?.email,
-              phone: shipmentData?.phone,
+            shippingInfo: {
+              firstName: shippingDetails?.firstName || "",
+              lastName: shippingDetails?.lastName || "",
+              email: shippingDetails?.email || "",
+              phone: shippingDetails?.phone || "",
+              address: shippingDetails?.address || "",
+              city: shippingDetails?.city || "",
+              state: shippingDetails?.state || "",
+              zipCode: shippingDetails?.zipCode || "",
+              country: shippingDetails?.country || "",
             },
             line_items: [
               {
@@ -73,30 +72,41 @@ export default function CryptoPayment({
         }
       );
 
-      let data;
+      console.log("📦 Shipping Details Payload:", shippingDetails);
+      console.log("🚀 Sending Crypto Payment Request:", response);
+
       const text = await response.text();
+      console.log("Raw Response:", text);
+      let data;
       try {
         data = JSON.parse(text);
       } catch (error) {
-        console.error("Invalid JSON response:", text);
+        console.error("❌ Invalid JSON response:", text);
         setError(true);
         return;
       }
 
-      setInvoiceUrl({
-        invoice_url: data.url,
-        message: "Redirecting to payment page",
-        payment_id: data.payment_id,
-      });
+      console.log("✅ Crypto Payment Response:", data);
+
+      if (data?.invoice_url) {
+        setInvoiceUrl({
+          invoice_url: data.invoice_url,
+          message: "Redirecting to payment page",
+        });
+        onSuccess();
+      } else {
+        console.error("🚨 Missing invoice_url in response:", data);
+        setError(true);
+        onError("Payment failed");
+      }      
     } catch (err) {
+      console.error("❌ Crypto Payment Error:", err);
       setError(true);
-      console.error(err);
+      onError("An error occurred");
     } finally {
       setIsProcessing(false);
     }
   };
-
-  console.log(invoice_url);
 
   return (
     <div className="p-6 border rounded-lg">
@@ -156,12 +166,12 @@ export default function CryptoPayment({
       )}
 
       <div className="mt-4 text-sm text-gray-500">
-        <p>Accepted tokens:</p>
-        <ul className="list-disc list-inside">
-          <li>ETH (Ethereum)</li>
-          <li>USDT (Tether)</li>
-        </ul>
+      <label>Select Cryptocurrency:</label>
+      <select value={selectedCurrency} onChange={(e) => setSelectedCurrency(e.target.value)} className="p-2 border rounded w-full">
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="USDT">Tether (USDT)</option>
+      </select>
+        </div>
       </div>
-    </div>
   );
 }

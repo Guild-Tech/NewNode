@@ -4,11 +4,16 @@ const orderSchema = new mongoose.Schema(
   {
     orderID: { type: String, required: true },
     order_description: { type: String },
-    shippingInfo: {type: String},
-    customer: {
-      name: { type: String },
-      email: { type: String },
-      phone: { type: String },
+    shippingInfo: {
+      firstName: String,
+      lastName: String,
+      email: String,
+      phone: String,
+      address: String,
+      city: String,
+      state: String,
+      zipCode: String,
+      country: String,
     },
     totalPrice: { type: Number, required: true },
     orderStatus: { type: String, default: "Pending" },
