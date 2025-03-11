@@ -7,7 +7,6 @@ import { ShipmentFormData } from "./ShipmentDetails";
 
 interface CryptoPaymentProps {
   amount: number;
-  email: string;
   shippingDetails: ShipmentFormData | null;
   onSuccess: () => void;
   onError: (error: string) => void;
@@ -15,7 +14,6 @@ interface CryptoPaymentProps {
 
 export default function CryptoPayment({
   amount,
-  email,
   shippingDetails,
   onSuccess,
   onError,
@@ -45,7 +43,6 @@ export default function CryptoPayment({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            customer_email: email,
             pay_currency: selectedCurrency,
             order_description,
             shippingInfo: {
@@ -143,7 +140,7 @@ export default function CryptoPayment({
       ) : (
         <button
           onClick={handleCryptoPayment}
-          disabled={isProcessing || !email}
+          disabled={isProcessing}
           className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
           {isProcessing ? (

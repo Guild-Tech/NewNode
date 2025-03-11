@@ -9,36 +9,35 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 // Route to create a Stripe checkout session
 router.post("/create-checkout-session", async (req, res) => {
   try {
-    const { line_items, order_description, customer, shippingDetails } = req.body;
+    const { line_items, order_description, shippingInfo } = req.body;
 
     if (!line_items || !Array.isArray(line_items) || line_items.length === 0) {
       return res.status(400).json({ message: "Invalid product details" });
     }
 
     // Calculate total price
-    const totalAmount =
-      line_items.reduce((sum, item) => {
-        if (
-          !item ||
-          !item.price_data ||
-          typeof item.price_data.unit_amount !== "number"
-        ) {
-          console.error("Invalid item structure:", item);
-          return sum; // Skip invalid items
-        }
+    const totalAmount = line_items.reduce(
+      (sum, item) => sum + (item.price_data.unit_amount / 100) * (item.quantity || 1),
+      0
+    );
 
-        return sum + item.price_data.unit_amount * (item.quantity || 1);
-      }, 0) / 100;
-
-    // Generate a unique order ID (for demo, using timestamp)
+    // Generate a unique order ID
     const orderID = "ORD" + Date.now();
 
-    // Create a new order in the database with 'pending' payment status
+    // Create a new order in the database with 'Pending' payment status
     const order = new Order({
       orderID,
       order_description,
-      shippingInfo: shippingDetails,
-      customer: customer,
+      shippingInfo: {
+        firstName: shippingInfo.firstName,
+        lastName: shippingInfo.lastName,
+        phone: shippingInfo.phone,
+        address: shippingInfo.address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        zipCode: shippingInfo.zipCode,
+        country: shippingInfo.country,
+      },
       totalPrice: totalAmount,
       orderStatus: "Pending",
       warranty: "2 years",
@@ -48,7 +47,7 @@ router.post("/create-checkout-session", async (req, res) => {
 
     const savedOrder = await order.save();
 
-    // Create Stripe checkout session
+    // Create Stripe checkout session (removing email input)
     const session = await stripe.checkout.sessions.create({
       submit_type: "pay",
       line_items,
@@ -56,6 +55,8 @@ router.post("/create-checkout-session", async (req, res) => {
       success_url: `${YOUR_DOMAIN}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${YOUR_DOMAIN}/canceled`,
       metadata: { order_id: savedOrder._id.toString(), order_description },
+      customer_email: shippingInfo.email, // Pass email directly instead of requiring input
+      billing_address_collection: "auto", // Avoid email prompt
     });
 
     // Update order with the Stripe session ID
@@ -64,7 +65,6 @@ router.post("/create-checkout-session", async (req, res) => {
 
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Checkout Session Error:", error);
     res.status(500).json({
       message: "Error creating checkout session",
       error: error.message,
@@ -81,14 +81,13 @@ router.post(
     let event;
 
     try {
-      // Verify the webhook signature using your Stripe signing secret
+      // Verify the webhook signature
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        env.STRIPE_WEBHOOK_SECRET
+        process.env.STRIPE_WEBHOOK_SECRET
       );
     } catch (err) {
-      console.error("Webhook signature verification failed:", err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
@@ -96,18 +95,13 @@ router.post(
       const session = event.data.object;
 
       try {
-        console.log("Session data:", session);
-
         // Retrieve shipment details from session
         const shipmentDetails = session.customer_details?.address || {};
-
-        console.log("Shipment Details:", shipmentDetails);
 
         // Find the order in the database using metadata
         const order = await Order.findOne({ _id: session.metadata.order_id });
 
         if (!order) {
-          console.error("Order not found for session:", session.id);
           return res.status(404).send("Order not found");
         }
 
@@ -115,11 +109,10 @@ router.post(
         order.shippingInfo = shipmentDetails;
         order.orderStatus = "Completed";
 
-        const savedOrder = await order.save();
+        await order.save();
 
         res.status(200).json({ received: true });
       } catch (error) {
-        console.error("Error updating order:", error);
         return res.status(500).send("Internal Server Error");
       }
     }

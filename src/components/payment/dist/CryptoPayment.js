@@ -43,7 +43,7 @@ var cartStore_1 = require("../../store/cartStore");
 var uuid_1 = require("uuid");
 function CryptoPayment(_a) {
     var _this = this;
-    var amount = _a.amount, email = _a.email, shippingDetails = _a.shippingDetails, onSuccess = _a.onSuccess, onError = _a.onError;
+    var amount = _a.amount, shippingDetails = _a.shippingDetails, onSuccess = _a.onSuccess, onError = _a.onError;
     var _b = react_1.useState(), invoice_url = _b[0], setInvoiceUrl = _b[1];
     var _c = react_1.useState(false), isProcessing = _c[0], setIsProcessing = _c[1];
     var _d = cartStore_1.useCartStore(), items = _d.items, getTotalPrice = _d.getTotalPrice;
@@ -65,7 +65,6 @@ function CryptoPayment(_a) {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                customer_email: email,
                                 pay_currency: selectedCurrency,
                                 order_description: order_description,
                                 shippingInfo: {
@@ -144,7 +143,7 @@ function CryptoPayment(_a) {
                 amount)),
         (invoice_url === null || invoice_url === void 0 ? void 0 : invoice_url.invoice_url) ? (React.createElement(React.Fragment, null,
             React.createElement("a", { target: "_blank", href: "" + (invoice_url === null || invoice_url === void 0 ? void 0 : invoice_url.invoice_url), className: "w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2" }, "Continue"),
-            React.createElement("span", { className: "text-xs text-gray-500" }, "you will be redirected to the payment page"))) : (React.createElement("button", { onClick: handleCryptoPayment, disabled: isProcessing || !email, className: "w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2" }, isProcessing ? (React.createElement(React.Fragment, null,
+            React.createElement("span", { className: "text-xs text-gray-500" }, "you will be redirected to the payment page"))) : (React.createElement("button", { onClick: handleCryptoPayment, disabled: isProcessing, className: "w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2" }, isProcessing ? (React.createElement(React.Fragment, null,
             React.createElement("div", { className: "animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" }),
             React.createElement("span", null, "Processing..."))) : (React.createElement(React.Fragment, null,
             React.createElement(lucide_react_1.Wallet, { className: "h-5 w-5" }),

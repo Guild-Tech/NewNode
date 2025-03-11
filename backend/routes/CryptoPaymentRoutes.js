@@ -11,9 +11,7 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 // Route to create a NowPayments crypto payment
 router.post("/create-crypto-payment", async (req, res) => {
   try {
-    console.log("📥 Full Request Body:", req.body);
-
-    const { line_items, order_description, shippingInfo, payment_currency } = req.body;
+    const { line_items, order_description, shippingInfo } = req.body;
 
     if (!req.body.shippingInfo) {
       return res.status(400).json({ error: "Missing shippingInfo object" });
@@ -23,7 +21,6 @@ router.post("/create-crypto-payment", async (req, res) => {
     const email = req.body.shippingInfo?.email.trim();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      console.error("🚨 Invalid email format:", email);
       return res.status(400).json({ error: "Invalid email address" });
     }
 
@@ -64,8 +61,8 @@ router.post("/create-crypto-payment", async (req, res) => {
     // Create a payment request on NowPayments
     const paymentRequestData = {
       price_amount: totalAmountUSD,
-      price_currency: "USD",
-      pay_currency: "ETH",
+      price_currency: "usd",
+      pay_currency: "btc",
       ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
       order_id: savedOrder._id.toString(),
       order_description,
@@ -83,8 +80,6 @@ router.post("/create-crypto-payment", async (req, res) => {
         },
       }
     );
-
-    console.log("🔍 NowPayments Full Response:", paymentResponse.data);
 
     if (!paymentResponse.data || !paymentResponse.data.payment_id) {
       return res
@@ -123,8 +118,6 @@ router.post("/create-crypto-payment", async (req, res) => {
 router.post("/webhook", async (req, res) => {
   try {
     const { payment_id, payment_status, order_id } = req.body;
-
-    console.log("Received Webhook Data:", req.body);
 
     if (!payment_id || !payment_status || !order_id) {
       return res.status(400).json({ message: "Invalid webhook data" });
