@@ -11,52 +11,45 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 // Route to create a NowPayments crypto payment
 router.post("/create-crypto-payment", async (req, res) => {
   try {
-    const { line_items, order_description, customer, shippingDetails } =
-      req.body;
+    const { line_items, order_description, shippingInfo, pay_currency } = req.body;
 
-    const orderID = "CRYPTO-" + Date.now();
-
-    const email =
-      req.body.customer_email ||
-      req.body.shipping_details?.email ||
-      nowPaymentsResponse?.customer_email;
-
-    if (!email) {
-      console.error("Error: Email is missing from the request or response.");
-      return res
-        .status(400)
-        .json({ error: "Email is required for processing." });
+    if (!req.body.shippingInfo) {
+      return res.status(400).json({ error: "Missing shippingInfo object" });
     }
 
-    console.log("Extracted Email:", email);
+    const orderID = "CRYPTO-" + Date.now();
+    const email = req.body.shippingInfo?.email.trim();
 
-    const totalAmount =
-      line_items.reduce((sum, item) => {
-        if (
-          !item ||
-          !item.price_data ||
-          typeof item.price_data.unit_amount !== "number"
-        ) {
-          console.error("Invalid item structure:", item);
-          return sum; // Skip invalid items
-        }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email address" });
+    }
 
-        return sum + item.price_data.unit_amount * (item.quantity || 1);
-      }, 0) / 100;
+    const totalAmountUSD = line_items.reduce((sum, item) => {
+      return sum + (item.price_data.unit_amount / 100) * (item.quantity || 1);
+    }, 0);
 
-    console.log("Received Crypto Payment Data:", req.body);
+    if (!shippingInfo || Object.keys(shippingInfo).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Missing required fields: shippingInfo" });
+    }
 
     // Create an order with pending status
     const order = new Order({
       orderID,
       order_description,
-      shippingInfo: shippingDetails,
-      customer: {
-        name: customer.name,
-        email: customer.email,
-        phone: customer.phone,
+      shippingInfo: {
+        firstName: shippingInfo.firstName,
+        lastName: shippingInfo.lastName,
+        email: shippingInfo.email,
+        phone: shippingInfo.phone,
+        address: shippingInfo.address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        zipCode: shippingInfo.zipCode,
+        country: shippingInfo.country,
       },
-      totalPrice: totalAmount,
+      totalPrice: totalAmountUSD,
       orderStatus: "Pending",
       warranty: "2 years",
       shippingPolicy: "Free shipping on orders above $500",
@@ -66,30 +59,30 @@ router.post("/create-crypto-payment", async (req, res) => {
     const savedOrder = await order.save();
 
     // Create a payment request on NowPayments
+    const paymentRequestData = {
+      price_amount: totalAmountUSD,
+      price_currency: "usd",
+      ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
+      order_id: savedOrder._id.toString(),
+      order_description,
+      success_url: `${YOUR_DOMAIN}/success`,
+      cancel_url: `${YOUR_DOMAIN}/canceled`,
+      is_fixed_rate: true,
+      is_fee_paid_by_user: false
+    };
+
     const paymentResponse = await axios.post(
-      `${NOWPAYMENTS_API_URL}/payment`,
-      {
-        price_amount: totalAmount,
-        price_currency: "ETH",
-        pay_currency: "ETH",
-        ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
-        order_id: savedOrder._id.toString(),
-        order_description,
-        customer_email: email,
-        success_url: `${YOUR_DOMAIN}/success`,
-        cancel_url: `${YOUR_DOMAIN}/canceled`,
-      },
+      `${NOWPAYMENTS_API_URL}/v1/invoice`,
+      paymentRequestData,
       {
         headers: {
-          "x-api-key": process.env.NOWPAYMENTS_API_KEY,
+          "x-api-key": NOWPAYMENTS_API_KEY,
           "Content-Type": "application/json",
         },
       }
     );
 
-    console.log("NowPayments Response:", paymentResponse.data);
-
-    if (!paymentResponse.data || !paymentResponse.data.invoice_url) {
+    if (!paymentResponse.data || !paymentResponse.data.payment_id) {
       return res
         .status(500)
         .json({ message: "Failed to create crypto payment" });
@@ -99,12 +92,26 @@ router.post("/create-crypto-payment", async (req, res) => {
     savedOrder.payment_id = paymentResponse.data.payment_id;
     await savedOrder.save();
 
-    res.json({ url: paymentResponse.data.invoice_url });
+    const invoice_url = `https://nowpayments.io/payment/?iid=${paymentResponse.data.payment_id}`;
+
+    res.json({
+      invoice_url,
+      payment_status: paymentResponse.data.payment_status,
+      order_id: paymentResponse.data.order_id,
+      payment_currency: paymentResponse.data.pay_currency,
+      payment_amount: paymentResponse.data.pay_amount,
+      payment_address: paymentResponse.data.pay_address,
+      payment_id: paymentResponse.data.payment_id,
+    });
   } catch (error) {
-    console.error("Crypto Payment Error:", error);
-    res
-      .status(500)
-      .json({ message: "Error creating crypto payment", error: error.message });
+    console.error(
+      "Error processing crypto payment:",
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).json({
+      message: "Failed to create crypto payment",
+      error: error.response ? error.response.data : error.message,
+    });
   }
 });
 
@@ -112,8 +119,6 @@ router.post("/create-crypto-payment", async (req, res) => {
 router.post("/webhook", async (req, res) => {
   try {
     const { payment_id, payment_status, order_id } = req.body;
-
-    console.log("Received Webhook Data:", req.body);
 
     if (!payment_id || !payment_status || !order_id) {
       return res.status(400).json({ message: "Invalid webhook data" });
@@ -140,7 +145,7 @@ router.post("/webhook", async (req, res) => {
 
     res.status(200).json({ received: true });
   } catch (error) {
-    console.error("Error handling webhook:", error);
+    console.error("Error handling webhook:", error.stack);
     res.status(500).send("Internal Server Error");
   }
 });
