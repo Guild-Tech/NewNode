@@ -22,7 +22,8 @@ app.use(cors({
     "http://localhost:5173",
     "http://localhost:5174",
     "https://nodebridge101.netlify.app",
-    "https://node-307s.onrender.com"
+    "https://newnode-sr37.onrender.com",
+    "http://localhost:4000",
   ],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
