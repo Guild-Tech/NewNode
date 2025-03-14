@@ -72,7 +72,7 @@ router.post("/create-crypto-payment", async (req, res) => {
     };
 
     const paymentResponse = await axios.post(
-      `${NOWPAYMENTS_API_URL}/v1/invoice`,
+      `${NOWPAYMENTS_API_URL}/payment`,
       paymentRequestData,
       {
         headers: {
