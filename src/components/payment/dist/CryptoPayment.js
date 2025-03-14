@@ -37,10 +37,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var react_1 = require("react");
+// import { useWeb3Modal } from '@web3modal/react';
+// import { useAccount } from "wagmi";
+//import DePay from '@depay/web3-payments';
 var lucide_react_1 = require("lucide-react");
 var convert_to_plainaText_1 = require("../../utils/convert to plainaText");
 var cartStore_1 = require("../../store/cartStore");
-var uuid_1 = require("uuid");
 function CryptoPayment(_a) {
     var _this = this;
     var amount = _a.amount, shippingDetails = _a.shippingDetails, onSuccess = _a.onSuccess, onError = _a.onError;
@@ -50,7 +52,7 @@ function CryptoPayment(_a) {
     var _e = react_1.useState(false), error = _e[0], setError = _e[1];
     var _f = react_1.useState("ETH"), selectedCurrency = _f[0], setSelectedCurrency = _f[1]; // Default ETH
     var order_description = convert_to_plainaText_1.retrieveSystemInfoAsText(items) + "Total Price: " + getTotalPrice();
-    var order_id = uuid_1.v4();
+    // const order_id = uuidv4();
     var handleCryptoPayment = function () { return __awaiter(_this, void 0, void 0, function () {
         var response, text, data, err_1;
         return __generator(this, function (_a) {
@@ -65,7 +67,7 @@ function CryptoPayment(_a) {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                pay_currency: selectedCurrency,
+                                pay_currency: selectedCurrency.toUpperCase(),
                                 order_description: order_description,
                                 shippingInfo: {
                                     firstName: (shippingDetails === null || shippingDetails === void 0 ? void 0 : shippingDetails.firstName) || "",
@@ -91,8 +93,9 @@ function CryptoPayment(_a) {
                         })];
                 case 2:
                     response = _a.sent();
-                    console.log("📦 Shipping Details Payload:", shippingDetails);
-                    console.log("🚀 Sending Crypto Payment Request:", response);
+                    if (!response.ok) {
+                        throw new Error("HTTP error! Status: " + response.status);
+                    }
                     return [4 /*yield*/, response.text()];
                 case 3:
                     text = _a.sent();
@@ -103,28 +106,26 @@ function CryptoPayment(_a) {
                     }
                     catch (error) {
                         console.error("❌ Invalid JSON response:", text);
-                        setError(true);
-                        return [2 /*return*/];
+                        throw new Error("Invalid JSON response from server");
                     }
                     console.log("✅ Crypto Payment Response:", data);
                     if (data === null || data === void 0 ? void 0 : data.invoice_url) {
                         setInvoiceUrl({
                             invoice_url: data.invoice_url,
-                            message: "Redirecting to payment page"
+                            message: "Redirecting to payment page",
+                            payment_id: data.id || ""
                         });
                         onSuccess();
                     }
                     else {
-                        console.error("🚨 Missing invoice_url in response:", data);
-                        setError(true);
-                        onError("Payment failed");
+                        throw new Error("Missing invoice_url in response");
                     }
                     return [3 /*break*/, 6];
                 case 4:
                     err_1 = _a.sent();
                     console.error("❌ Crypto Payment Error:", err_1);
                     setError(true);
-                    onError("An error occurred");
+                    onError(err_1.message || "An error occurred");
                     return [3 /*break*/, 6];
                 case 5:
                     setIsProcessing(false);
@@ -152,7 +153,7 @@ function CryptoPayment(_a) {
         React.createElement("div", { className: "mt-4 text-sm text-gray-500" },
             React.createElement("label", null, "Select Cryptocurrency:"),
             React.createElement("select", { value: selectedCurrency, onChange: function (e) { return setSelectedCurrency(e.target.value); }, className: "p-2 border rounded w-full" },
-                React.createElement("option", { value: "ETH" }, "Ethereum (ETH)"),
-                React.createElement("option", { value: "USDT" }, "Tether (USDT)")))));
+                React.createElement("option", { value: "eth" }, "Ethereum (ETH)"),
+                React.createElement("option", { value: "usdt" }, "Tether (USDT)")))));
 }
 exports["default"] = CryptoPayment;

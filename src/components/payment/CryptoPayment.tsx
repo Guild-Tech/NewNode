@@ -24,7 +24,7 @@ export default function CryptoPayment({
   const [invoice_url, setInvoiceUrl] = useState<{
     invoice_url: string;
     message: string;
-    payment_id:string
+    payment_id: string;
   }>();
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, getTotalPrice } = useCartStore();
@@ -39,8 +39,7 @@ export default function CryptoPayment({
   const handleCryptoPayment = async () => {
     setIsProcessing(true);
     setError(false);
-    console.log("response")
-
+  
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/create-crypto-payment`,
@@ -48,7 +47,7 @@ export default function CryptoPayment({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            pay_currency: selectedCurrency,
+            pay_currency: selectedCurrency.toUpperCase(), // Ensure consistency
             order_description,
             shippingInfo: {
               firstName: shippingDetails?.firstName || "",
@@ -73,44 +72,43 @@ export default function CryptoPayment({
           }),
         }
       );
-
-      console.log("📦 Shipping Details Payload:", shippingDetails);
-      console.log("🚀 Sending Crypto Payment Request:", response);
-
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
       const text = await response.text();
       console.log("Raw Response:", text);
+      
       let data;
       try {
         data = JSON.parse(text);
       } catch (error) {
         console.error("❌ Invalid JSON response:", text);
-        setError(true);
-        return;
+        throw new Error("Invalid JSON response from server");
       }
-
+  
       console.log("✅ Crypto Payment Response:", data);
-
+  
       if (data?.invoice_url) {
         setInvoiceUrl({
           invoice_url: data.invoice_url,
           message: "Redirecting to payment page",
-          payment_id:data.payment_id
+          payment_id: data.id || "",
         });
         onSuccess();
       } else {
-        console.error("🚨 Missing invoice_url in response:", data);
-        setError(true);
-        onError("Payment failed");
-      }      
+        throw new Error("Missing invoice_url in response");
+      }
     } catch (err) {
       console.error("❌ Crypto Payment Error:", err);
       setError(true);
-      onError("An error occurred");
+      onError(err.message || "An error occurred");
     } finally {
       setIsProcessing(false);
     }
   };
-
+  
   return (
     <div className="p-6 border rounded-lg">
       <div className="flex items-center justify-between mb-6">
@@ -169,12 +167,16 @@ export default function CryptoPayment({
       )}
 
       <div className="mt-4 text-sm text-gray-500">
-      <label>Select Cryptocurrency:</label>
-      <select value={selectedCurrency} onChange={(e) => setSelectedCurrency(e.target.value)} className="p-2 border rounded w-full">
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="USDT">Tether (USDT)</option>
-      </select>
-        </div>
+        <label>Select Cryptocurrency:</label>
+        <select
+          value={selectedCurrency}
+          onChange={(e) => setSelectedCurrency(e.target.value)}
+          className="p-2 border rounded w-full"
+        >
+          <option value="eth">Ethereum (ETH)</option>
+          <option value="usdt">Tether (USDT)</option>
+        </select>
       </div>
+    </div>
   );
 }
