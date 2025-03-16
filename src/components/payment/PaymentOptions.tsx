@@ -135,7 +135,7 @@ export default function PaymentOptions({ amount, onSuccess, shipmentData }: Paym
             <CryptoPayment
               amount={amount}
               shippingDetails={shippingDetails}
-              shipmentData={shipmentData}
+              // shipmentData={shipmentData}
               onSuccess={onSuccess}
               onError={() => alert("Crypto payment failed")}
             />

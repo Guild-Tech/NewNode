@@ -11,16 +11,20 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 // Route to create a NowPayments crypto payment
 router.post("/create-crypto-payment", async (req, res) => {
   try {
-    const { line_items, order_description, shippingInfo, pay_currency } = req.body;
+    console.log("Received request to create crypto payment:", req.body);
+    const { line_items, order_description, shippingInfo, pay_currency } =
+      req.body;
 
-    if (!req.body.shippingInfo) {
+    if (!shippingInfo) {
+      console.error("Missing shippingInfo object");
       return res.status(400).json({ error: "Missing shippingInfo object" });
     }
 
     const orderID = "CRYPTO-" + Date.now();
-    const email = req.body.shippingInfo?.email.trim();
+    const email = shippingInfo.email?.trim();
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.error("Invalid email address");
       return res.status(400).json({ error: "Invalid email address" });
     }
 
@@ -28,27 +32,13 @@ router.post("/create-crypto-payment", async (req, res) => {
       return sum + (item.price_data.unit_amount / 100) * (item.quantity || 1);
     }, 0);
 
-    if (!shippingInfo || Object.keys(shippingInfo).length === 0) {
-      return res
-        .status(400)
-        .json({ error: "Missing required fields: shippingInfo" });
-    }
+    console.log("Total amount calculated in USD:", totalAmountUSD);
 
     // Create an order with pending status
     const order = new Order({
       orderID,
       order_description,
-      shippingInfo: {
-        firstName: shippingInfo.firstName,
-        lastName: shippingInfo.lastName,
-        email: shippingInfo.email,
-        phone: shippingInfo.phone,
-        address: shippingInfo.address,
-        city: shippingInfo.city,
-        state: shippingInfo.state,
-        zipCode: shippingInfo.zipCode,
-        country: shippingInfo.country,
-      },
+      shippingInfo,
       totalPrice: totalAmountUSD,
       orderStatus: "Pending",
       warranty: "2 years",
@@ -57,23 +47,21 @@ router.post("/create-crypto-payment", async (req, res) => {
     });
 
     const savedOrder = await order.save();
+    console.log("Order saved successfully:", savedOrder);
 
     // Create a payment request on NowPayments
-    const paymentRequestData = {
-      price_amount: totalAmountUSD,
-      price_currency: "usd",
-      ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
-      order_id: savedOrder._id.toString(),
-      order_description,
-      success_url: `${YOUR_DOMAIN}/success`,
-      cancel_url: `${YOUR_DOMAIN}/canceled`,
-      is_fixed_rate: true,
-      is_fee_paid_by_user: false
-    };
-
-    const paymentResponse = await axios.post(
-      `${NOWPAYMENTS_API_URL}/payment`,
-      paymentRequestData,
+    const response = await axios.post(
+      "https://api.nowpayments.io/v1/invoice",
+      {
+        price_amount: totalAmountUSD,
+        price_currency: "usd",
+        pay_currency: pay_currency || "btc",
+        order_id: savedOrder._id.toString(),
+        order_description,
+        ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
+        success_url: `${YOUR_DOMAIN}/success`,
+        cancel_url: `${YOUR_DOMAIN}/canceled`,
+      },
       {
         headers: {
           "x-api-key": NOWPAYMENTS_API_KEY,
@@ -82,26 +70,29 @@ router.post("/create-crypto-payment", async (req, res) => {
       }
     );
 
-    if (!paymentResponse.data || !paymentResponse.data.payment_id) {
+    console.log("NowPayments response:", response.data);
+
+    if (!response.data || !response.data.id) {
+      console.error("Failed to create crypto payment", response.data);
       return res
         .status(500)
         .json({ message: "Failed to create crypto payment" });
     }
 
     // Save the payment ID
-    savedOrder.payment_id = paymentResponse.data.payment_id;
+    savedOrder.payment_id = response.data.id;
     await savedOrder.save();
 
-    const invoice_url = `https://nowpayments.io/payment/?iid=${paymentResponse.data.payment_id}`;
+    console.log("Updated order with payment ID:", savedOrder);
 
     res.json({
-      invoice_url,
-      payment_status: paymentResponse.data.payment_status,
-      order_id: paymentResponse.data.order_id,
-      payment_currency: paymentResponse.data.pay_currency,
-      payment_amount: paymentResponse.data.pay_amount,
-      payment_address: paymentResponse.data.pay_address,
-      payment_id: paymentResponse.data.payment_id,
+      invoice_url: `https://nowpayments.io/payment/?iid=${response.data.id}`,
+      payment_status: response.data.payment_status,
+      order_id: response.data.order_id,
+      payment_currency: response.data.pay_currency,
+      payment_amount: response.data.pay_amount,
+      payment_address: response.data.pay_address,
+      payment_id: response.data.id,
     });
   } catch (error) {
     console.error(
@@ -118,19 +109,23 @@ router.post("/create-crypto-payment", async (req, res) => {
 // Webhook to handle NowPayments payment status updates
 router.post("/webhook", async (req, res) => {
   try {
+    console.log("Received webhook request:", req.body);
     const { payment_id, payment_status, order_id } = req.body;
 
     if (!payment_id || !payment_status || !order_id) {
+      console.error("Invalid webhook data");
       return res.status(400).json({ message: "Invalid webhook data" });
     }
 
     // Find the order in the database
-    const order = await Order.findOne({ _id: order_id });
+    const order = await Order.findOne({ orderID: order_id });
 
     if (!order) {
       console.error("Order not found for payment_id:", payment_id);
       return res.status(404).send("Order not found");
     }
+
+    console.log("Order found, updating status...");
 
     // Update order status based on payment status
     if (payment_status === "confirmed" || payment_status === "finished") {
@@ -142,6 +137,7 @@ router.post("/webhook", async (req, res) => {
     }
 
     await order.save();
+    console.log("Order status updated successfully:", order);
 
     res.status(200).json({ received: true });
   } catch (error) {
