@@ -5,7 +5,7 @@ import { CPU, RAM, Storage } from "@/context/ProductContext";
 export type ProductFormData = {
   name: string;
   description: string;
-  basePrice: number;
+  price: number;
   image: string;
   category: string;
   cpuOptions: CPU[];
@@ -24,7 +24,7 @@ export function validateProductForm(formData: ProductFormData): boolean {
     return false;
   }
   
-  if (formData.basePrice <= 0) {
+  if (formData.price <= 0) {
     toast.error("Base price must be greater than zero");
     return false;
   }

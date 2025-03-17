@@ -7,19 +7,20 @@ import { SectionHeader } from "../../components/ui/SectionHeader";
 import { ProductForm } from "../../components/products/ProductForm";
 
 const EditProduct = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>(); // id is always a string from useParams
   const navigate = useNavigate();
   const { getProduct } = useProducts();
-  
-  const product = id ? getProduct(id) : undefined;
-  
+
+  const productId = id ? Number(id) : undefined; // Convert id to number
+  const product = productId ? getProduct(productId) : undefined;
+
   useEffect(() => {
     if (!product) {
       toast.error("Product not found");
-      navigate("/products");
+      navigate("/dashboard/products"); // Redirect to products list if not found
     }
   }, [product, navigate]);
-  
+
   if (!product) {
     return null;
   }
@@ -31,8 +32,8 @@ const EditProduct = () => {
           title={`Edit ${product.name}`}
           description="Update your product details and customization options"
         />
-        
-        <ProductForm editMode productId={id} />
+
+        <ProductForm editMode productId={productId} />
       </div>
     </DashboardLayout>
   );

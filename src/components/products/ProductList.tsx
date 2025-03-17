@@ -8,6 +8,12 @@ import { Package, Plus } from "lucide-react";
 export function ProductList() {
   const { products } = useProducts();
 
+if (!Array.isArray(products)) {
+  console.error("Expected an array but got:", products);
+  return <p>Error: Products data is invalid.</p>;
+}
+
+
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] glass-panel rounded-xl p-8">

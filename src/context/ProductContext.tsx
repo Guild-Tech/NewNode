@@ -1,48 +1,51 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import axios from 'axios';
 import { toast } from 'sonner';
 
 export type CPU = {
-  id: string;
+  id: number;
   name: string;
   price: number;
 };
 
 export type RAM = {
-  id: string;
+  id: number;
   size: string;
   price: number;
 };
 
 export type Storage = {
-  id: string;
+  id: number;
   type: string;
   size: string;
   price: number;
 };
 
 export type Product = {
-  id: string;
+  id: number;
   name: string;
   description: string;
-  basePrice: number;
+  price: number;
   image: string;
   category: string;
-  cpuOptions: CPU[];
-  ramOptions: RAM[];
-  storageOptions: Storage[];
+  specs: {
+    software: ['Dappnode', 'Stereum', 'Sege', 'Coincashew', 'Blockops'];
+    ram: ['16GB', '32GB', '64GB'];
+    storage: ['2TB SSD', '4TB SSD'];
+    processor: ['Intel i3', 'Intel i5', 'Intel i7'];
+  };
   createdAt: Date;
-};
+}; 
 
 type ProductContextType = {
   products: Product[];
   addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => void;
-  updateProduct: (id: string, product: Partial<Product>) => void;
-  deleteProduct: (id: string) => void;
-  getProduct: (id: string) => Product | undefined;
+  updateProduct: (id: number, product: Partial<Product>) => void;
+  deleteProduct: (id: number) => void;
+  getProduct: (id: number) => Product | undefined;
 };
 
-const ProductContext = createContext<ProductContextType | undefined>(undefined);
+const ProductContext = createContext<ProductContextType | null>(null);
 
 export const useProducts = () => {
   const context = useContext(ProductContext);
@@ -52,88 +55,78 @@ export const useProducts = () => {
   return context;
 };
 
-// Sample data for initial products
-const initialProducts: Product[] = [
-  {
-    id: '1',
-    name: 'ProBook X3',
-    description: 'Professional laptop for developers',
-    basePrice: 999,
-    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop',
-    category: 'Laptop',
-    cpuOptions: [
-      { id: 'cpu1', name: 'Intel i5 12th Gen', price: 0 },
-      { id: 'cpu2', name: 'Intel i7 12th Gen', price: 200 },
-      { id: 'cpu3', name: 'Intel i9 12th Gen', price: 400 },
-    ],
-    ramOptions: [
-      { id: 'ram1', size: '8GB', price: 0 },
-      { id: 'ram2', size: '16GB', price: 100 },
-      { id: 'ram3', size: '32GB', price: 250 },
-    ],
-    storageOptions: [
-      { id: 'storage1', type: 'SSD', size: '256GB', price: 0 },
-      { id: 'storage2', type: 'SSD', size: '512GB', price: 100 },
-      { id: 'storage3', type: 'SSD', size: '1TB', price: 200 },
-    ],
-    createdAt: new Date(),
-  },
-  {
-    id: '2',
-    name: 'UltraDesk Pro',
-    description: 'High performance desktop for gaming and content creation',
-    basePrice: 1299,
-    image: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=2042&auto=format&fit=crop',
-    category: 'Desktop',
-    cpuOptions: [
-      { id: 'cpu1', name: 'AMD Ryzen 5', price: 0 },
-      { id: 'cpu2', name: 'AMD Ryzen 7', price: 200 },
-      { id: 'cpu3', name: 'AMD Ryzen 9', price: 450 },
-    ],
-    ramOptions: [
-      { id: 'ram1', size: '16GB', price: 0 },
-      { id: 'ram2', size: '32GB', price: 150 },
-      { id: 'ram3', size: '64GB', price: 300 },
-    ],
-    storageOptions: [
-      { id: 'storage1', type: 'SSD', size: '512GB', price: 0 },
-      { id: 'storage2', type: 'SSD', size: '1TB', price: 120 },
-      { id: 'storage3', type: 'SSD', size: '2TB', price: 250 },
-    ],
-    createdAt: new Date(),
+// Reducer to manage product state
+const productReducer = (state: Product[], action: any): Product[] => {
+  switch (action.type) {
+    case 'SET_PRODUCTS':
+      return action.payload;
+    case 'ADD_PRODUCT':
+      return [...state, action.payload];
+    case 'UPDATE_PRODUCT':
+      return state.map((product) =>
+        product.id === action.payload.id ? { ...product, ...action.payload.data } : product
+      );
+    case 'DELETE_PRODUCT':
+      return state.filter((product) => product.id !== action.payload);
+    default:
+      return state;
   }
-];
+};
 
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, dispatch] = useReducer(productReducer, []);
 
-  const addProduct = (product: Omit<Product, 'id' | 'createdAt'>) => {
-    const newProduct = {
-      ...product,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-    };
-    setProducts([...products, newProduct]);
-    toast.success('Product added successfully');
+  // Fetch products from backend
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_API_URL}/products`)
+      .then((response) => {
+        if (Array.isArray(response.data)) {
+          dispatch({ type: 'SET_PRODUCTS', payload: response.data });
+        } else {
+          console.error("Invalid product data:", response.data);
+          toast.error("Failed to load products");
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to load products");
+      });
+  }, []);
+
+  // Add product
+  const addProduct = async (product: Omit<Product, 'id' | 'createdAt'>) => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/products`, product);
+      dispatch({ type: 'ADD_PRODUCT', payload: response.data });
+      toast.success('Product added successfully');
+    } catch (error) {
+      toast.error('Failed to add product');
+    }
   };
 
-  const updateProduct = (id: string, updatedProduct: Partial<Product>) => {
-    setProducts(
-      products.map((product) =>
-        product.id === id
-          ? { ...product, ...updatedProduct }
-          : product
-      )
-    );
-    toast.success('Product updated successfully');
+  // Update product
+  const updateProduct = async (id: number, updatedProduct: Partial<Product>) => {
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/products/${id}`, updatedProduct);
+      dispatch({ type: 'UPDATE_PRODUCT', payload: { id, data: updatedProduct } });
+      toast.success('Product updated successfully');
+    } catch (error) {
+      toast.error('Failed to update product');
+    }
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts(products.filter((product) => product.id !== id));
-    toast.success('Product deleted successfully');
+  // Delete product
+  const deleteProduct = async (id: number) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/products/${id}`);
+      dispatch({ type: 'DELETE_PRODUCT', payload: id });
+      toast.success('Product deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete product');
+    }
   };
 
-  const getProduct = (id: string) => {
+  // Get a single product
+  const getProduct = (id: number) => {
     return products.find((product) => product.id === id);
   };
 

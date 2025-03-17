@@ -1,39 +1,52 @@
-
-// import { DashboardLayout } from "@/components/layout/Dashboard";
-// import { SectionHeader } from "@/components/ui/SectionHeader";
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Cpu, Gift, Package, Plus, ShoppingBag } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { useProducts } from "../../context/ProductContext";
 import { DashboardLayout } from "../../components/layout/Dashboard";
 import { SectionHeader } from "../../components/ui/SectionHeader";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { ProductCard } from "../../components/products/ProductCard";
-// import { useProducts } from "@/context/ProductContext";
-// import { ProductCard } from "@/components/products/ProductCard";
+import { Cpu, Gift, Package, Plus, ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Dashboard = () => {
-  const { products } = useProducts();
-  
-  const latestProducts = products.slice(0, 3);
-  
-  const totalProducts = products.length;
-  const averagePrice = products.length 
-    ? products.reduce((sum, product) => sum + product.basePrice, 0) / products.length 
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { products } = useProducts() || { products: [] };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (!isAuthenticated) return null; // Prevent rendering if not authenticated
+
+  const latestProducts = products?.slice(0, 3) || [];
+  const totalProducts = products?.length || 0;
+  const averagePrice = totalProducts
+    ? products.reduce((sum, product) => sum + (product.price || 0), 0) / totalProducts
     : 0;
-  const totalOptions = products.reduce(
-    (sum, product) => 
-      sum + product.cpuOptions.length + product.ramOptions.length + product.storageOptions.length, 
+  const totalOptions = products?.reduce(
+    (sum, product) =>
+      sum +
+      (product.specs?.processor?.length || 0) +
+      (product.specs?.ram?.length || 0) +
+      (product.specs?.storage?.length || 0),
     0
   );
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <SectionHeader 
-          title="Dashboard" 
+        <SectionHeader
+          title="Dashboard"
           description="Welcome to your product management dashboard"
           action={
             <Button asChild>
@@ -45,6 +58,7 @@ const Dashboard = () => {
           }
         />
         
+        {/* Cards Section */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className="bg-blue-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -55,7 +69,7 @@ const Dashboard = () => {
               <div className="text-2xl font-bold">{totalProducts}</div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-green-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Avg. Price</CardTitle>
@@ -65,7 +79,7 @@ const Dashboard = () => {
               <div className="text-2xl font-bold">${averagePrice.toFixed(2)}</div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-purple-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Customization Options</CardTitle>
@@ -75,18 +89,21 @@ const Dashboard = () => {
               <div className="text-2xl font-bold">{totalOptions}</div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-amber-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Unique Components</CardTitle>
               <Cpu className="h-4 w-4 text-amber-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{products.reduce((sum, p) => sum + p.cpuOptions.length, 0)}</div>
+              <div className="text-2xl font-bold">
+                {products.reduce((sum, p) => sum + (p.specs?.processor?.length || 0), 0)}
+              </div>
             </CardContent>
           </Card>
         </div>
-        
+
+        {/* Latest Products Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">Latest Products</h3>
@@ -94,7 +111,7 @@ const Dashboard = () => {
               <Link to="/products">View all</Link>
             </Button>
           </div>
-          
+
           {latestProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {latestProducts.map((product) => (

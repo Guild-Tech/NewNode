@@ -50,22 +50,22 @@ export function ProductCard({ product, className }: ProductCardProps) {
               </p>
             </div>
             <div className="bg-primary px-2 py-1 rounded-full text-xs font-medium">
-              ${product.basePrice}
+              ${product.price}
             </div>
           </div>
           
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
             <div className="flex flex-col">
               <span className="text-muted-foreground">CPU Options</span>
-              <span className="font-medium">{product.cpuOptions.length}</span>
+              <span className="font-medium">{(product.cpuOptions?.length || 3)}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground">RAM Options</span>
-              <span className="font-medium">{product.ramOptions.length}</span>
+              <span className="font-medium">{product.ramOptions?.length || 3}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground">Storage</span>
-              <span className="font-medium">{product.storageOptions.length}</span>
+              <span className="font-medium">{product.storageOptions?.length || 3}</span>
             </div>
           </div>
         </CardContent>

@@ -14,22 +14,22 @@ import {
 type ProductInfoCardProps = {
   name: string;
   description: string;
-  basePrice: number;
+  price: number;
   category: string;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onBasePriceChange: (value: number) => void;
+  onpriceChange: (value: number) => void;
   onCategoryChange: (value: string) => void;
 };
 
 export function ProductInfoCard({
   name,
   description,
-  basePrice,
+  price,
   category,
   onNameChange,
   onDescriptionChange,
-  onBasePriceChange,
+  onpriceChange,
   onCategoryChange,
 }: ProductInfoCardProps) {
   return (
@@ -62,15 +62,15 @@ export function ProductInfoCard({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="basePrice">Base Price ($)</Label>
+            <Label htmlFor="price">Base Price ($)</Label>
             <Input
-              id="basePrice"
-              name="basePrice"
+              id="price"
+              name="price"
               type="number"
               min="0"
               step="0.01"
-              value={basePrice}
-              onChange={(e) => onBasePriceChange(parseFloat(e.target.value) || 0)}
+              value={price}
+              onChange={(e) => onpriceChange(parseFloat(e.target.value) || 0)}
             />
           </div>
           <div className="space-y-2">

@@ -1,7 +1,6 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from 'sonner';
-import { Product } from './ProductContext';
+import axios from 'axios';
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
@@ -15,24 +14,36 @@ export type OrderItem = {
 };
 
 export type Order = {
-  id: string;
-  customerId: string;
-  customerName: string;
-  customerEmail: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: OrderStatus;
-  shippingAddress: string;
-  createdAt: Date;
-  updatedAt: Date;
+  _id: string;
+  orderID: string;
+  order_description?: string;
+  shippingInfo: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  totalPrice: number;
+  orderStatus: OrderStatus;
+  warranty?: string;
+  shippingPolicy?: string;
+  customerSupport?: string;
+  stripe_session_id?: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type OrderContextType = {
   orders: Order[];
-  addOrder: (order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateOrder: (id: string, updates: Partial<Order>) => void;
-  updateOrderStatus: (id: string, status: OrderStatus) => void;
-  deleteOrder: (id: string) => void;
+  addOrder: (order: Omit<Order, '_id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateOrder: (id: string, updates: Partial<Order>) => Promise<void>;
+  updateOrderStatus: (id: string, status: OrderStatus) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
   getOrder: (id: string) => Order | undefined;
 };
 
@@ -46,117 +57,74 @@ export const useOrders = () => {
   return context;
 };
 
-// Sample data for initial orders
-const initialOrders: Order[] = [
-  {
-    id: '1',
-    customerId: 'cust1',
-    customerName: 'Jane Doe',
-    customerEmail: 'jane.doe@example.com',
-    items: [
-      {
-        productId: '1',
-        quantity: 1,
-        selectedCpu: 'cpu2',
-        selectedRam: 'ram2',
-        selectedStorage: 'storage2',
-        price: 1399, // Base + upgrades
-      }
-    ],
-    totalAmount: 1399,
-    status: 'pending',
-    shippingAddress: '123 Main St, Anytown, CA 12345',
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-    updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '2',
-    customerId: 'cust2',
-    customerName: 'John Smith',
-    customerEmail: 'john.smith@example.com',
-    items: [
-      {
-        productId: '2',
-        quantity: 1,
-        selectedCpu: 'cpu3',
-        selectedRam: 'ram3',
-        selectedStorage: 'storage3',
-        price: 2349, // Base + upgrades
-      }
-    ],
-    totalAmount: 2349,
-    status: 'processing',
-    shippingAddress: '456 Oak Ave, Somewhere, NY 67890',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-  },
-  {
-    id: '3',
-    customerId: 'cust3',
-    customerName: 'Alice Johnson',
-    customerEmail: 'alice.johnson@example.com',
-    items: [
-      {
-        productId: '1',
-        quantity: 2,
-        selectedCpu: 'cpu1',
-        selectedRam: 'ram3',
-        selectedStorage: 'storage2',
-        price: 2698, // (Base + upgrades) * 2
-      }
-    ],
-    totalAmount: 2698,
-    status: 'shipped',
-    shippingAddress: '789 Pine Blvd, Elsewhere, TX 54321',
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-  }
-];
-
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  const addOrder = (order: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date();
-    const newOrder = {
-      ...order,
-      id: Date.now().toString(),
-      createdAt: now,
-      updatedAt: now,
+  // Fetch orders from the backend
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/orders`);
+        setOrders(response.data);
+      } catch (error) {
+        toast.error('Failed to fetch orders');
+      }
     };
-    setOrders([...orders, newOrder]);
-    toast.success('Order added successfully');
+    fetchOrders();
+  }, []);
+
+  // Add a new order
+  const addOrder = async (order: Omit<Order, '_id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/order`, order);
+      setOrders((prevOrders) => [...prevOrders, response.data.order]);
+      toast.success('Order added successfully');
+    } catch (error) {
+      toast.error('Failed to add order');
+    }
   };
 
-  const updateOrder = (id: string, updates: Partial<Order>) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === id
-          ? { ...order, ...updates, updatedAt: new Date() }
-          : order
-      )
-    );
-    toast.success('Order updated successfully');
+  // Update an order
+  const updateOrder = async (id: string, updates: Partial<Order>) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}`, updates);
+      setOrders((prevOrders) =>
+        prevOrders.map((order) => (order._id === id ? response.data.order : order))
+      );
+      toast.success('Order updated successfully');
+    } catch (error) {
+      toast.error('Failed to update order');
+    }
   };
 
-  const updateOrderStatus = (id: string, status: OrderStatus) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === id
-          ? { ...order, status, updatedAt: new Date() }
-          : order
-      )
-    );
-    toast.success(`Order status updated to ${status}`);
+  // Update order status
+  const updateOrderStatus = async (id: string, status: OrderStatus) => {
+    try {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}/status`, { orderStatus: status });
+      console.log("Response:", response.data);
+      setOrders((prevOrders) =>
+        prevOrders.map((order) => (order._id === id ? response.data.order : order))
+      );
+      toast.success(`Order status updated to ${status}`);
+    } catch (error) {
+      toast.error('Failed to update order status');
+    }
   };
 
-  const deleteOrder = (id: string) => {
-    setOrders(orders.filter((order) => order.id !== id));
-    toast.success('Order deleted successfully');
+  // Delete an order
+  const deleteOrder = async (id: string) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/orders/${id}`);
+      setOrders((prevOrders) => prevOrders.filter((order) => order._id !== id));
+      toast.success('Order deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete order');
+    }
   };
 
+  // Get a single order
   const getOrder = (id: string) => {
-    return orders.find((order) => order.id === id);
+    return orders.find((order) => order._id === id);
   };
 
   return (
