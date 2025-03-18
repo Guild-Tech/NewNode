@@ -9,7 +9,7 @@ exports.createOrder = async (req, res) => {
     res.status(201).json({ message: 'Order placed successfully', order: newOrder });
   } catch (error) {
     console.error("Error creating order:", error);
-    res.status(500).json({ message: 'Error creating order', error });
+    res.status(500).json({ message: 'Error creating order', error: error.message });
   }
 };
 
@@ -19,53 +19,65 @@ exports.getAllOrders = async (req, res) => {
     const orders = await Order.find();
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching orders', error });
+    res.status(500).json({ message: 'Error fetching orders', error: error.message });
   }
 };
 
-// Get order by ID
+// Get order by ID (using _id)
 exports.getOrderById = async (req, res) => {
   try {
-    const order = await Order.findOne({ orderID: req.params.id });
+    const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
     res.status(200).json(order);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching order', error });
+    res.status(500).json({ message: 'Error fetching order', error: error.message });
   }
 };
 
 // Update order status
 exports.updateOrderStatus = async (req, res) => {
   try {
+    const { id } = req.params;
     const { orderStatus } = req.body;
-    const order = await Order.findOneAndUpdate(
-      { orderID: req.params.id },
-      { orderStatus, updatedAt: new Date() },
-      { new: true }
-    );
 
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid order ID' });
     }
 
-    res.status(200).json({ message: 'Order status updated', order });
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { orderStatus },
+      { new: true } // Return updated order
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.status(200).json({ message: "Order status updated", order: updatedOrder });
   } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).json({ message: 'Error updating order status', error });
+    res.status(500).json({ message: "Error updating order status", error: error.message });
   }
 };
 
-// Delete order
+// Delete order (using _id)
 exports.deleteOrder = async (req, res) => {
   try {
-    const order = await Order.findOneAndDelete({ orderID: req.params.id });
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid order ID' });
+    }
+
+    const order = await Order.findByIdAndDelete(id);
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+
     res.status(200).json({ message: 'Order deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting order', error });
+    res.status(500).json({ message: 'Error deleting order', error: error.message });
   }
 };

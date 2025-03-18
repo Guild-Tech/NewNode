@@ -100,8 +100,7 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
   // Update order status
   const updateOrderStatus = async (id: string, status: OrderStatus) => {
     try {
-      const response = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}/status`, { orderStatus: status });
-      console.log("Response:", response.data);
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}/status`, { orderStatus: status }); 
       setOrders((prevOrders) =>
         prevOrders.map((order) => (order._id === id ? response.data.order : order))
       );

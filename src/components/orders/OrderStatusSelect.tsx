@@ -1,14 +1,12 @@
-
-import React from 'react';
-import { Check, ChevronDown } from 'lucide-react';
-import { 
+import React, { useState, useEffect } from "react";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../components/ui/select';
-import { OrderStatus, useOrders } from '../../context/OrderContext';
+} from "../../components/ui/select";
+import { OrderStatus, useOrders } from "../../context/OrderContext";
 
 type OrderStatusSelectProps = {
   orderId: string;
@@ -16,16 +14,30 @@ type OrderStatusSelectProps = {
 };
 
 export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectProps) {
-  const { updateOrderStatus } = useOrders();
-  
+  const { updateOrderStatus, orders, setOrders } = useOrders(); // Ensure state updates
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(currentStatus);
+
+  useEffect(() => {
+    setSelectedStatus(currentStatus);
+  }, [currentStatus]); // Update if status changes from backend
+
   const handleStatusChange = (value: string) => {
-    updateOrderStatus(orderId, value as OrderStatus);
+    const newStatus = value as OrderStatus;
+    setSelectedStatus(newStatus);
+    updateOrderStatus(orderId, newStatus);
+
+    // Manually update state to trigger UI change
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order._id === orderId ? { ...order, orderStatus: newStatus } : order
+      )
+    );
   };
 
   return (
-    <Select defaultValue={currentStatus} onValueChange={handleStatusChange}>
+    <Select value={selectedStatus} onValueChange={handleStatusChange}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select status" />
+        <SelectValue placeholder="Select status">{selectedStatus}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="pending">Pending</SelectItem>
