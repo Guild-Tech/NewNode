@@ -99,6 +99,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       dispatch({ type: 'ADD_PRODUCT', payload: response.data });
       toast.success('Product added successfully');
     } catch (error) {
+      console.error("Update Failed:", error.response?.data || error.message)
       toast.error('Failed to add product');
     }
   };
@@ -107,6 +108,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const updateProduct = async (id: number, updatedProduct: Partial<Product>) => {
     try {
       await axios.put(`${import.meta.env.VITE_API_URL}/products/${id}`, updatedProduct);
+      console.log("Submitting product update:", JSON.stringify(updatedProduct, null, 2));
       dispatch({ type: 'UPDATE_PRODUCT', payload: { id, data: updatedProduct } });
       toast.success('Product updated successfully');
     } catch (error) {

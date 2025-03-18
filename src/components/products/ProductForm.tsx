@@ -30,6 +30,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   const { addProduct, updateProduct, getProduct } = useProducts();
 
   const existingProduct = productId ? getProduct(productId) : undefined;
+  console.log("Product ID:", productId);
 
   const [formState, setFormState] = useState<ProductFormData>({
     name: existingProduct?.name || "",
@@ -39,6 +40,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
       existingProduct?.image ||
       "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop",
     category: existingProduct?.category || "Laptop",
+    software: existingProduct?.specs?.software || "Dappnode", // Include software
     cpuOptions: existingProduct?.specs?.processor
       ? Object.keys(PROCESSOR_OPTIONS).map((key) => ({
           id: key,
@@ -61,15 +63,15 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
           price: STORAGE_OPTIONS[key].price,
         }))
       : [],
-  });
+  }); 
 
   // Field change handlers
   const handleFieldChange = (field: keyof ProductFormData, value: any) => {
     setFormState({
       ...formState,
-      [field]: value,
+      [field]: field === "price" ? (value === "" ? "" : parseInt(value)) : value,
     });
-  };
+  };    
 
   // CPU handlers
   const handleAddCpuOption = () => {
@@ -183,26 +185,34 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!validateProductForm(formState)) {
       return;
     }
-
+  
+    const productData = {
+      name: formState.name,
+      description: formState.description,
+      price: formState.price,
+      image: formState.image,
+      specs: {
+        software: formState.software,
+        processor:
+          formState.cpuOptions.length > 0 ? formState.cpuOptions[0].name : "Intel i3",
+        ram: formState.ramOptions.length > 0 ? formState.ramOptions[0].size : "16GB",
+        storage: formState.storageOptions.length > 0 ? formState.storageOptions[0].size : "2TB SSD",
+      },
+    };
+  
     if (editMode && productId) {
-      console.log("Updating product with ID:", productId);
-      updateProduct(productId, formState);
-      console.log("Product updated successfully!");
+      updateProduct(productId, productData);
     } else {
-      addProduct(formState);
-      console.log("Product added successfully!");
+      addProduct(productData);
     }
-
-    console.log("Edit Mode:", editMode);
-    console.log("Product ID:", productId);
-    console.log("Form Data:", formState);
-
+  
     navigate("/dashboard-home");
-  };
+    console.log("Submitting product update:", productData);
+  };  
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">

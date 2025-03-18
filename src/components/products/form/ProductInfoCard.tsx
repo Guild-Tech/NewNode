@@ -68,9 +68,8 @@ export function ProductInfoCard({
               name="price"
               type="number"
               min="0"
-              step="0.01"
               value={price}
-              onChange={(e) => onpriceChange(parseFloat(e.target.value) || 0)}
+              onChange={(e) => onpriceChange(parseInt(e.target.value) || 0)}
             />
           </div>
           <div className="space-y-2">

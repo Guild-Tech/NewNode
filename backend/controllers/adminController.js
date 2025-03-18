@@ -3,7 +3,7 @@ const Order = require("../models/Order");
 
 // Hardcoded admin credentials (For production, store in a database or use environment variables)
 const ADMIN_CREDENTIALS = {
-  email: "admin@example.com",
+  email: "Node@example.com",
   password: "admin123",
 };
 

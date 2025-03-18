@@ -108,7 +108,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">Latest Products</h3>
             <Button variant="outline" asChild size="sm">
-              <Link to="/products">View all</Link>
+              <Link to="/dashboard-home">View all</Link>
             </Button>
           </div>
 
