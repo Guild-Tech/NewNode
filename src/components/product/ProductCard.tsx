@@ -6,6 +6,7 @@ import { useCartStore } from '../../store/cartStore';
 import { calculatePrice } from '../../utils/price';
 import ProductOptions from './ProductOptions';
 import Product3DView from './Product3DView';
+import Cloudnary from '../cloudnary/Cloudnary';
 
 interface ProductCardProps {
   product: Product;
@@ -39,11 +40,13 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Product3DView />
         ) : (
           <div className="group">
-            <img 
+            {/* <img 
               src={product.image} 
               alt={product.name} 
               className="w-full h-[400px] object-cover transform group-hover:scale-110 transition-transform duration-300" 
-            />
+            /> */}
+                      <Cloudnary cldImg={product.image} format="auto" quality="auto" width={500} height={500} />
+            
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="flex gap-2">

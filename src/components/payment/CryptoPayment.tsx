@@ -29,13 +29,13 @@ export default function CryptoPayment({
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, getTotalPrice } = useCartStore();
   const [error, setError] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState("ETH"); // Default ETH
+  const [selectedCurrency, setSelectedCurrency] = useState("eth"); // Default ETH
 
   const order_description = `${retrieveSystemInfoAsText(
     items
   )}Total Price: ${getTotalPrice()}`;
   // const order_id = uuidv4();
-
+console.log(selectedCurrency)
   const handleCryptoPayment = async () => {
     setIsProcessing(true);
     setError(false);
@@ -47,7 +47,7 @@ export default function CryptoPayment({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            pay_currency: selectedCurrency.toUpperCase(), // Ensure consistency
+            pay_currency: selectedCurrency, // Ensure consistency
             order_description,
             shippingInfo: {
               firstName: shippingDetails?.firstName || "",
@@ -100,7 +100,7 @@ export default function CryptoPayment({
       } else {
         throw new Error("Missing invoice_url in response");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("❌ Crypto Payment Error:", err);
       setError(true);
       onError(err.message || "An error occurred");
@@ -174,7 +174,15 @@ export default function CryptoPayment({
           className="p-2 border rounded w-full"
         >
           <option value="eth">Ethereum (ETH)</option>
-          <option value="usdt">Tether (USDT)</option>
+          <option value="usdtmatic">MATIC (USDT)</option>
+          <option value="usdcarb">Arbitrum (USDC)</option>
+          <option value="usdtarb">Arbitrum (USDT)</option>
+          <option value="usdtbsc">BSC (USDT)</option>
+          <option value="ethbsc">BSC (ETH)</option>
+          <option value="usdtsol">SOL (USDT)</option>
+          <option value="usdtton">TON (USDT)</option>
+          <option value="usdcbsc">BSC (USDC)</option>
+          <option value="usdcbase">BASE (USDC)</option>
         </select>
       </div>
     </div>

@@ -9,10 +9,10 @@ import { useCartStore } from "../../store/cartStore";
 interface PaymentOptionsProps {
   amount: number;
   onSuccess: () => void;
-  shipmentData: ShipmentFormData;
+  // shipmentData: ShipmentFormData;
 }
 
-export default function PaymentOptions({ amount, onSuccess, shipmentData }: PaymentOptionsProps) {
+export default function PaymentOptions({ amount, onSuccess }: PaymentOptionsProps) {
   const [selectedMethod, setSelectedMethod] = useState<"card" | "crypto" | null>(null);
   const [processing, setProcessing] = useState(false);
   const [step, setStep] = useState<"selection" | "shipping" | "payment">("selection");

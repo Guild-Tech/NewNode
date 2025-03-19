@@ -16,6 +16,8 @@ import {
 } from "../../components/ui/alert-dialog";
 import { Product, useProducts } from "../../context/ProductContext";
 import { cn } from "../../utils/utils";
+// import { AdvancedImage, placeholder, responsive } from "@cloudinary/react";
+import Cloudnary from "../cloudnary/Cloudnary";
 
 type ProductCardProps = {
   product: Product;
@@ -35,11 +37,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
     <>
       <Card className={cn("overflow-hidden transition-all duration-300 hover:shadow-md group", className)}>
         <div className="aspect-[16/9] overflow-hidden bg-secondary/20">
-          <img
+                    
+
+          <Cloudnary cldImg={product.image} format="auto" quality="auto" width={500} height={500} />
+          {/* <img
             src={product.image}
             alt={product.name}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          /> */}
         </div>
         <CardContent className="p-4">
           <div className="flex justify-between items-start">

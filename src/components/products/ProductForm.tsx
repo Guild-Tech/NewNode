@@ -19,6 +19,7 @@ import { CpuOptionsCard } from "./form/CpuOptionsCard";
 import { RamOptionsCard } from "./form/RamOptionsCard";
 import { StorageOptionsCard } from "./form/StorageOptionsCard";
 import { validateProductForm, ProductFormData } from "./form/FormValidator";
+// import { UploadImg } from "../cloudnary/UploadImg";
 
 type ProductFormProps = {
   editMode?: boolean;
@@ -28,9 +29,12 @@ type ProductFormProps = {
 export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   const navigate = useNavigate();
   const { addProduct, updateProduct, getProduct } = useProducts();
+  const [publicId, setPublicId] = useState('');
+
 
   const existingProduct = productId ? getProduct(productId) : undefined;
-  console.log("Product ID:", productId);
+
+
 
   const [formState, setFormState] = useState<ProductFormData>({
     name: existingProduct?.name || "",
@@ -43,35 +47,34 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     software: existingProduct?.specs?.software || "Dappnode", // Include software
     cpuOptions: existingProduct?.specs?.processor
       ? Object.keys(PROCESSOR_OPTIONS).map((key) => ({
-          id: key,
-          name: PROCESSOR_OPTIONS[key].label,
-          price: PROCESSOR_OPTIONS[key].price,
-        }))
+        id: key,
+        name: PROCESSOR_OPTIONS[key].label,
+        price: PROCESSOR_OPTIONS[key].price,
+      }))
       : [],
     ramOptions: existingProduct?.specs?.ram
       ? Object.keys(RAM_OPTIONS).map((key) => ({
-          id: key,
-          size: RAM_OPTIONS[key].label,
-          price: RAM_OPTIONS[key].price,
-        }))
+        id: key,
+        size: RAM_OPTIONS[key].label,
+        price: RAM_OPTIONS[key].price,
+      }))
       : [],
     storageOptions: existingProduct?.specs?.storage
       ? Object.keys(STORAGE_OPTIONS).map((key) => ({
-          id: key,
-          type: "SSD",
-          size: STORAGE_OPTIONS[key].label,
-          price: STORAGE_OPTIONS[key].price,
-        }))
+        id: key,
+        type: "SSD",
+        size: STORAGE_OPTIONS[key].label,
+        price: STORAGE_OPTIONS[key].price,
+      }))
       : [],
-  }); 
-
+  });
   // Field change handlers
   const handleFieldChange = (field: keyof ProductFormData, value: any) => {
     setFormState({
       ...formState,
       [field]: field === "price" ? (value === "" ? "" : parseInt(value)) : value,
     });
-  };    
+  };
 
   // CPU handlers
   const handleAddCpuOption = () => {
@@ -101,9 +104,9 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
       cpuOptions: formState.cpuOptions.map((option) =>
         option.id === id
           ? {
-              ...option,
-              [field]: field === "price" ? parseFloat(value) || 0 : value,
-            }
+            ...option,
+            [field]: field === "price" ? parseFloat(value) || 0 : value,
+          }
           : option
       ),
     });
@@ -137,9 +140,9 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
       ramOptions: formState.ramOptions.map((option) =>
         option.id === id
           ? {
-              ...option,
-              [field]: field === "price" ? parseFloat(value) || 0 : value,
-            }
+            ...option,
+            [field]: field === "price" ? parseFloat(value) || 0 : value,
+          }
           : option
       ),
     });
@@ -175,9 +178,9 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
       storageOptions: formState.storageOptions.map((option) =>
         option.id === id
           ? {
-              ...option,
-              [field]: field === "price" ? parseFloat(value) || 0 : value,
-            }
+            ...option,
+            [field]: field === "price" ? parseFloat(value) || 0 : value,
+          }
           : option
       ),
     });
@@ -185,16 +188,16 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!validateProductForm(formState)) {
       return;
     }
-  
+
     const productData = {
       name: formState.name,
       description: formState.description,
       price: formState.price,
-      image: formState.image,
+      image: publicId,
       specs: {
         software: formState.software,
         processor:
@@ -203,19 +206,22 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
         storage: formState.storageOptions.length > 0 ? formState.storageOptions[0].size : "2TB SSD",
       },
     };
-  
+// console.log(productData)
     if (editMode && productId) {
       updateProduct(productId, productData);
     } else {
       addProduct(productData);
     }
-  
+
     navigate("/dashboard-home");
-    console.log("Submitting product update:", productData);
-  };  
+    // console.log("Submitting product update:", productData);
+  };
+// console.log(publicId)
+
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+    
+    <form  onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ProductInfoCard
           name={formState.name}
@@ -229,10 +235,11 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
           onpriceChange={(value) => handleFieldChange("price", value)}
           onCategoryChange={(value) => handleFieldChange("category", value)}
         />
-
         <ImageUploader
-          image={formState.image}
-          onImageChange={(image) => handleFieldChange("image", image)}
+          publicId={publicId}
+          setPublicId={setPublicId}
+          // image={formState.image}
+          onImageChange={(publicId) => handleFieldChange("image", publicId)}
         />
       </div>
 
@@ -267,7 +274,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
         >
           Cancel
         </Button>
-        <Button type="submit">
+        <Button  type="submit" >
           {editMode ? "Update Product" : "Create Product"}
         </Button>
       </div>

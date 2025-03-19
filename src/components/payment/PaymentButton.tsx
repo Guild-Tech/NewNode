@@ -3,10 +3,10 @@ import PaymentOptions from './PaymentOptions';
 
 interface PaymentButtonProps {
   amount: number;
-  orderDetails: any;
+  // orderDetails: any;
 }
 
-export default function PaymentButton({ amount, orderDetails }: PaymentButtonProps) {
+export default function PaymentButton({ amount }: PaymentButtonProps) {
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
 
   if (showPaymentOptions) {

@@ -32,7 +32,7 @@ export function Sidebar() {
   const path = location.pathname;
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 flex h-full  w-64 flex-col border-r bg-white p-4 shadow-sm animate-fade-in mt-20 mb-20">
+    <div className="absolute inset-y-0 left-0 top-20 z-50 flex   w-64 flex-col border-r bg-white p-4 shadow-sm animate-fade-in ">
       {/* <div className="flex h-14 items-center px-4 border-b mb-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">

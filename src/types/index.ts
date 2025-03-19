@@ -30,3 +30,9 @@ export interface PaymentConfig {
   amount: number;
   receiver: string;
 }
+
+declare global {
+  interface Window {
+    cloudinary: any; // or the actual type of the cloudinary object
+  }
+}
