@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Server, Shield, Recycle, Zap, Globe, Cpu } from 'lucide-react';
+import { ArrowRight, Server, Shield, Zap, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Hero() {

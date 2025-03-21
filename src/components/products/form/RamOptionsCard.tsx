@@ -45,14 +45,14 @@ export function RamOptionsCard({
               <Input
                 placeholder="RAM Size"
                 value={option.size}
-                onChange={(e) => onOptionChange(option.id, 'size', e.target.value)}
+                onChange={(e) => onOptionChange(option.id as any, 'size', e.target.value)}
               />
               <Input
                 type="number"
                 placeholder="Price"
                 value={option.price}
                 min="0"
-                onChange={(e) => onOptionChange(option.id, 'price', e.target.value)}
+                onChange={(e) => onOptionChange(option.id as any, 'price', e.target.value)}
               />
             </div>
             {ramOptions.length > 1 && (
@@ -60,7 +60,7 @@ export function RamOptionsCard({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => onRemoveOption(option.id)}
+                onClick={() => onRemoveOption(option.id as any)}
                 className="h-10 w-10 text-red-500 hover:text-red-600 hover:bg-red-50"
               >
                 <Trash2 className="h-4 w-4" />

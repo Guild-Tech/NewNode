@@ -1,3 +1,5 @@
+import { PROCESSOR_OPTIONS, RAM_OPTIONS, STORAGE_OPTIONS } from "../config/constants";
+
 export interface NodeConfig {
   software: 'Dappnode' | 'Stereum' | 'Sege' | 'Coincashew' | 'Blockops';
   ram: '16GB' | '32GB' | '64GB';
@@ -36,3 +38,8 @@ declare global {
     cloudinary: any; // or the actual type of the cloudinary object
   }
 }
+
+export type RAMOptionKey = keyof typeof RAM_OPTIONS;
+export type STORAGEOptionKey = keyof typeof STORAGE_OPTIONS;
+export type PROCESSOROptionKey = keyof typeof PROCESSOR_OPTIONS;
+

@@ -12,9 +12,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [config, setConfig] = useState<NodeConfig>({
     software: "Dappnode",
-    ram: product.specs.defaultRam as NodeConfig["ram"],
-    storage: product.specs.defaultStorage as NodeConfig["storage"],
-    processor: product.specs.defaultProcessor as NodeConfig["processor"],
+    ram: product.specs.ram as NodeConfig["ram"],
+    storage: product.specs.storage as NodeConfig["storage"],
+    processor: product.specs.processor as NodeConfig["processor"],
   });
 
   const handleAddToCart = () => {
@@ -22,7 +22,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const price = product.price;
-  const price = calculatePrice(price, config);
+  const pricec = calculatePrice(price, config);
+  console.log(pricec);
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-105">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -14,7 +14,9 @@ type OrderStatusSelectProps = {
 };
 
 export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectProps) {
-  const { updateOrderStatus, orders, setOrders } = useOrders(); // Ensure state updates
+  const { updateOrderStatus,
+    //  setOrders
+     } = useOrders(); // Ensure state updates
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>(currentStatus);
 
   useEffect(() => {
@@ -27,11 +29,11 @@ export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectP
     updateOrderStatus(orderId, newStatus);
 
     // Manually update state to trigger UI change
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order._id === orderId ? { ...order, orderStatus: newStatus } : order
-      )
-    );
+    // setOrders((prevOrders: any) =>
+    //   prevOrders.map((order: any) =>
+    //     order._id === orderId ? { ...order, orderStatus: newStatus } : order
+    //   )
+    // );
   };
 
   return (

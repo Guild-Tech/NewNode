@@ -1,6 +1,7 @@
 
 import { toast } from "sonner";
-import { CPU, RAM, Storage } from "@/context/ProductContext";
+import { CPU, RAM } from "../../../context/ProductContext";
+// import { CPU, RAM, Storage } from "@/context/ProductContext";
 
 export type ProductFormData = {
   name: string;

@@ -8,8 +8,8 @@ import { CPU } from "../../../context/ProductContext";
 type CpuOptionsCardProps = {
   cpuOptions: CPU[];
   onAddOption: () => void;
-  onRemoveOption: (id: string) => void;
-  onOptionChange: (id: string, field: keyof CPU, value: string) => void;
+  onRemoveOption: (id: number) => void;
+  onOptionChange: (id: number, field: keyof CPU, value: string) => void;
 };
 
 export function CpuOptionsCard({ 

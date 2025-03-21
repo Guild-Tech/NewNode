@@ -1,4 +1,3 @@
-import React from "react";
 import { format } from "date-fns";
 import {
   Table,
@@ -8,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { useOrders, Order } from "../../context/OrderContext";
+import { useOrders } from "../../context/OrderContext";
 import { OrderStatusBadge } from "../../components/orders/OrderStatusBadge";
 import { OrderStatusSelect } from "../../components/orders/OrderStatusSelect";
 import {

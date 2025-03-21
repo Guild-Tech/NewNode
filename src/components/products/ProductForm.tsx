@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useProducts,
-  Product,
+  // Product,
   CPU,
   RAM,
   Storage,
@@ -12,13 +12,15 @@ import {
   RAM_OPTIONS,
   STORAGE_OPTIONS,
 } from "../../config/constants";
-import { Button } from "../../components/ui/button";
+// import { Button } from "../../components/ui/button";
 import { ProductInfoCard } from "./form/ProductInfoCard";
 import { ImageUploader } from "./form/ImageUploader";
 import { CpuOptionsCard } from "./form/CpuOptionsCard";
 import { RamOptionsCard } from "./form/RamOptionsCard";
 import { StorageOptionsCard } from "./form/StorageOptionsCard";
 import { validateProductForm, ProductFormData } from "./form/FormValidator";
+import { PROCESSOROptionKey, RAMOptionKey, STORAGEOptionKey } from "../../types";
+import { Button } from "../ui/button";
 // import { UploadImg } from "../cloudnary/UploadImg";
 
 type ProductFormProps = {
@@ -36,7 +38,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
 
 
 
-  const [formState, setFormState] = useState<ProductFormData>({
+  const [formState, setFormState] = useState<ProductFormData | any>({
     name: existingProduct?.name || "",
     description: existingProduct?.details || "",
     price: existingProduct?.price || 0,
@@ -48,23 +50,23 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     cpuOptions: existingProduct?.specs?.processor
       ? Object.keys(PROCESSOR_OPTIONS).map((key) => ({
         id: key,
-        name: PROCESSOR_OPTIONS[key].label,
-        price: PROCESSOR_OPTIONS[key].price,
+        name: PROCESSOR_OPTIONS[key as PROCESSOROptionKey].label,
+        price: PROCESSOR_OPTIONS[key as PROCESSOROptionKey].price,
       }))
       : [],
     ramOptions: existingProduct?.specs?.ram
       ? Object.keys(RAM_OPTIONS).map((key) => ({
         id: key,
-        size: RAM_OPTIONS[key].label,
-        price: RAM_OPTIONS[key].price,
+        size: RAM_OPTIONS[key as RAMOptionKey].label,
+        price: RAM_OPTIONS[key  as RAMOptionKey].price,
       }))
       : [],
     storageOptions: existingProduct?.specs?.storage
       ? Object.keys(STORAGE_OPTIONS).map((key) => ({
         id: key,
         type: "SSD",
-        size: STORAGE_OPTIONS[key].label,
-        price: STORAGE_OPTIONS[key].price,
+        size: STORAGE_OPTIONS[key as STORAGEOptionKey].label,
+        price: STORAGE_OPTIONS[key as STORAGEOptionKey].price,
       }))
       : [],
   });
@@ -81,7 +83,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     setFormState({
       ...formState,
       cpuOptions: [
-        ...formState.cpuOptions,
+        ...formState.cpuOptions as any,
         { id: Date.now().toString(), name: "", price: 0 },
       ],
     });
@@ -90,7 +92,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   const handleRemoveCpuOption = (id: string) => {
     setFormState({
       ...formState,
-      cpuOptions: formState.cpuOptions.filter((option) => option.id !== id),
+      cpuOptions: formState.cpuOptions.filter((option: any) => option.id !== id),
     });
   };
 
@@ -101,7 +103,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   ) => {
     setFormState({
       ...formState,
-      cpuOptions: formState.cpuOptions.map((option) =>
+      cpuOptions: formState.cpuOptions.map((option: any) =>
         option.id === id
           ? {
             ...option,
@@ -126,7 +128,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   const handleRemoveRamOption = (id: string) => {
     setFormState({
       ...formState,
-      ramOptions: formState.ramOptions.filter((option) => option.id !== id),
+      ramOptions: formState.ramOptions.filter((option: any) => option.id !== id),
     });
   };
 
@@ -137,7 +139,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   ) => {
     setFormState({
       ...formState,
-      ramOptions: formState.ramOptions.map((option) =>
+      ramOptions: formState.ramOptions.map((option: any) =>
         option.id === id
           ? {
             ...option,
@@ -163,7 +165,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     setFormState({
       ...formState,
       storageOptions: formState.storageOptions.filter(
-        (option) => option.id !== id
+        (option: any) => option.id !== id
       ),
     });
   };
@@ -175,7 +177,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   ) => {
     setFormState({
       ...formState,
-      storageOptions: formState.storageOptions.map((option) =>
+      storageOptions: formState.storageOptions.map((option: any) =>
         option.id === id
           ? {
             ...option,
@@ -210,7 +212,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     if (editMode && productId) {
       updateProduct(productId, productData);
     } else {
-      addProduct(productData);
+      addProduct(productData as any);
     }
 
     navigate("/dashboard-home");
@@ -247,8 +249,8 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
         <CpuOptionsCard
           cpuOptions={formState.cpuOptions}
           onAddOption={handleAddCpuOption}
-          onRemoveOption={handleRemoveCpuOption}
-          onOptionChange={handleCpuOptionChange}
+          onRemoveOption={handleRemoveCpuOption as any}
+          onOptionChange={handleCpuOptionChange as any}
         />
 
         <RamOptionsCard

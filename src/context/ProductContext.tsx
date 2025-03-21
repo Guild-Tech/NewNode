@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import  { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
@@ -28,6 +28,10 @@ export type Product = {
   price: number;
   image: string;
   category: string;
+  cpuOptions?: CPU[];
+  ramOptions?: RAM[];
+  details?: string;
+  storageOptions?: Storage[];
   specs: {
     software: ['Dappnode', 'Stereum', 'Sege', 'Coincashew', 'Blockops'];
     ram: ['16GB', '32GB', '64GB'];
@@ -98,7 +102,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/products`, product);
       dispatch({ type: 'ADD_PRODUCT', payload: response.data });
       toast.success('Product added successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update Failed:", error.response?.data || error.message)
       toast.error('Failed to add product');
     }

@@ -46,12 +46,12 @@ export function StorageOptionsCard({
         </Button>
       </CardHeader>
       <CardContent className="space-y-4 pt-3">
-        {storageOptions.map((option) => (
+        {storageOptions.map((option: any) => (
           <div key={option.id} className="grid grid-cols-[1fr,auto] gap-2">
             <div className="grid grid-cols-3 gap-2">
               <Select 
                 value={option.type} 
-                onValueChange={(value) => onOptionChange(option.id, 'type', value)}
+                onValueChange={(value) => onOptionChange(option.id as any, 'type', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Type" />
@@ -65,14 +65,14 @@ export function StorageOptionsCard({
               <Input
                 placeholder="Size"
                 value={option.size}
-                onChange={(e) => onOptionChange(option.id, 'size', e.target.value)}
+                onChange={(e) => onOptionChange(option.id as any, 'size', e.target.value)}
               />
               <Input
                 type="number"
                 placeholder="Price"
                 value={option.price}
                 min="0"
-                onChange={(e) => onOptionChange(option.id, 'price', e.target.value)}
+                onChange={(e) => onOptionChange(option.id as any, 'price', e.target.value)}
               />
             </div>
             {storageOptions.length > 1 && (
@@ -80,7 +80,7 @@ export function StorageOptionsCard({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => onRemoveOption(option.id)}
+                onClick={() => onRemoveOption(option.id as any)}
                 className="h-10 w-10 text-red-500 hover:text-red-600 hover:bg-red-50"
               >
                 <Trash2 className="h-4 w-4" />

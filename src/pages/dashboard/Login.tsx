@@ -30,7 +30,7 @@ const Login = () => {
         throw new Error(data.message || "Invalid login credentials.");
       }
 
-      login(data.token); // Save token in auth context
+      login(); // Save token in auth context
       const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     } catch (err: any) {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Truck, CreditCard, Building2, User } from 'lucide-react';
+import { Truck} from 'lucide-react';
 
 interface ShipmentDetailsProps {
   onSubmit: (details: ShipmentFormData) => void;

@@ -66,8 +66,8 @@ export default function Products() {
         <div className="text-center text-lg">Loading products...</div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {currentProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {currentProducts.map((product: Product) => (
+            <ProductCard key={product.id} product={product as any} />
           ))}
         </div>
       )}

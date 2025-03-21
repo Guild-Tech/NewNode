@@ -101,7 +101,7 @@ export default function About() {
               }
             ].map((value, index) => (
               <motion.div
-                key={value.title}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={valuesInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.8, delay: value.delay }}

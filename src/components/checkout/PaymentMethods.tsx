@@ -6,7 +6,7 @@ interface PaymentMethodsProps {
   amount: number;
 }
 
-export default function PaymentMethods({ onSubmit, amount }: PaymentMethodsProps) {
+export default function PaymentMethods({ onSubmit }: PaymentMethodsProps) {
   const [selectedMethod, setSelectedMethod] = useState('credit-card');
 
   return (

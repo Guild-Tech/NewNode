@@ -5,11 +5,11 @@ import ShipmentDetails from '../components/payment/ShipmentDetails';
 import PaymentMethods from '../components/checkout/PaymentMethods';
 import OrderPreview from '../components/checkout/OrderPreview';
 import { useCartStore } from '../store/cartStore';
-import type { ShipmentFormData } from '../types';
+// import type { ShipmentFormData } from '../types';
 
 export default function Checkout() {
   const [step, setStep] = useState(1);
-  const [shippingDetails, setShippingDetails] = useState<ShipmentFormData | null>(null);
+  // const [shippingDetails, setShippingDetails] = useState<ShipmentFormData | null>(null);
   const navigate = useNavigate();
   const { items, getTotalPrice, clearCart } = useCartStore();
 
@@ -18,12 +18,12 @@ export default function Checkout() {
     return null;
   }
 
-  const handleShipmentSubmit = (data: ShipmentFormData) => {
-    setShippingDetails(data);
+  const handleShipmentSubmit = () => {
+    // setShippingDetails(data);
     setStep(2);
   };
 
-  const handlePaymentSubmit = async (method: string) => {
+  const handlePaymentSubmit = async () => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       clearCart();

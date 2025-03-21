@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { CreditCard, Lock } from 'lucide-react';
 
 interface CreditCardFormProps {
   onSubmit: (paymentDetails: { paymentMethodId: string; orderDetails: any }) => Promise<void>;
