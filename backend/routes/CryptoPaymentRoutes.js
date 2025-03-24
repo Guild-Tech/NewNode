@@ -3,6 +3,16 @@ const express = require("express");
 const axios = require("axios");
 const router = express.Router();
 const Order = require("../models/Order");
+const nodemailer = require("nodemailer");
+
+// Initialize Nodemailer transporter (example using Gmail)
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER, // your email address
+    pass: process.env.EMAIL_PASS, // your email password or app-specific password
+  },
+});
 
 const NOWPAYMENTS_API_KEY = process.env.NOWPAYMENTS_API_KEY;
 const NOWPAYMENTS_API_URL = process.env.NOWPAYMENTS_API_URL;
@@ -12,8 +22,7 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 router.post("/create-crypto-payment", async (req, res) => {
   try {
     console.log("Received request to create crypto payment:", req.body);
-    const { line_items, order_description, shippingInfo, pay_currency } =
-      req.body;
+    const { line_items, order_description, shippingInfo, pay_currency } = req.body;
 
     if (!shippingInfo) {
       console.error("Missing shippingInfo object");
@@ -34,7 +43,7 @@ router.post("/create-crypto-payment", async (req, res) => {
 
     console.log("Total amount calculated in USD:", totalAmountUSD);
 
-    // Create an order with pending status
+    // Create an order with 'Pending' status
     const order = new Order({
       orderID,
       order_description,
@@ -74,15 +83,12 @@ router.post("/create-crypto-payment", async (req, res) => {
 
     if (!response.data || !response.data.id) {
       console.error("Failed to create crypto payment", response.data);
-      return res
-        .status(500)
-        .json({ message: "Failed to create crypto payment" });
+      return res.status(500).json({ message: "Failed to create crypto payment" });
     }
 
-    // Save the payment ID
+    // Save the payment ID in the order
     savedOrder.payment_id = response.data.id;
     await savedOrder.save();
-
     console.log("Updated order with payment ID:", savedOrder);
 
     res.json({
@@ -106,7 +112,7 @@ router.post("/create-crypto-payment", async (req, res) => {
   }
 });
 
-// Webhook to handle NowPayments payment status updates
+// Webhook to handle NowPayments payment status updates and send confirmation email
 router.post("/webhook", async (req, res) => {
   try {
     console.log("Received webhook request:", req.body);
@@ -117,16 +123,14 @@ router.post("/webhook", async (req, res) => {
       return res.status(400).json({ message: "Invalid webhook data" });
     }
 
-    // Find the order in the database
+    // Find the order in the database by matching the orderID field
     const order = await Order.findOne({ orderID: order_id });
-
     if (!order) {
       console.error("Order not found for payment_id:", payment_id);
       return res.status(404).send("Order not found");
     }
 
     console.log("Order found, updating status...");
-
     // Update order status based on payment status
     if (payment_status === "confirmed" || payment_status === "finished") {
       order.orderStatus = "Completed";
@@ -138,6 +142,24 @@ router.post("/webhook", async (req, res) => {
 
     await order.save();
     console.log("Order status updated successfully:", order);
+
+    // If payment is completed, send a confirmation email
+    if (payment_status === "confirmed" || payment_status === "finished") {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: order.shippingInfo.email,
+        subject: "Your order has been received",
+        text: `Hi ${order.shippingInfo.firstName},\n\nYour order (${order.orderID}) has been received and will be processed shortly.\n\nThank you for your purchase!\n\nBest regards,\nYour Company Name`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+        } else {
+          console.log("Email sent successfully:", info.response);
+        }
+      });
+    }
 
     res.status(200).json({ received: true });
   } catch (error) {

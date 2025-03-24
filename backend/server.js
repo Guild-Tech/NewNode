@@ -20,10 +20,8 @@ app.use(bodyParser.json());
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "http://localhost:5174",
-    "https://nodebridge101.netlify.app",
     "https://newnode-sr37.onrender.com",
-    "http://localhost:4000",
+    "https://nodebridges.netlify.app",
   ],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
