@@ -6,8 +6,7 @@ import { X } from "lucide-react";
 // import { useState } from "react";
 import { AdvancedImage, placeholder, responsive } from "@cloudinary/react";
 import CloudinaryUploadWidget from "../../cloudnary/CloudinaryUploadWidget";
-import { Button } from "../../ui/button";
-import { toast } from "sonner";
+
 
 type ImageUploaderProps = {
   // image: string;
