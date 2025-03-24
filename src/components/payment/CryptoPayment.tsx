@@ -174,15 +174,7 @@ console.log(selectedCurrency)
           className="p-2 border rounded w-full"
         >
           <option value="eth">Ethereum (ETH)</option>
-          <option value="usdtmatic">MATIC (USDT)</option>
-          <option value="usdcarb">Arbitrum (USDC)</option>
-          <option value="usdtarb">Arbitrum (USDT)</option>
           <option value="usdtbsc">BSC (USDT)</option>
-          <option value="ethbsc">BSC (ETH)</option>
-          <option value="usdtsol">SOL (USDT)</option>
-          <option value="usdtton">TON (USDT)</option>
-          <option value="usdcbsc">BSC (USDC)</option>
-          <option value="usdcbase">BASE (USDC)</option>
         </select>
       </div>
     </div>
