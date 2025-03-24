@@ -81,7 +81,7 @@ export function ProductInfoCard({
               <SelectTrigger id="category">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="Laptop">Laptop</SelectItem>
                 <SelectItem value="Desktop">Desktop</SelectItem>
                 <SelectItem value="Tablet">Tablet</SelectItem>

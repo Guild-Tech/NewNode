@@ -2,6 +2,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "../../utils/utils";
 import { LucideIcon, LayoutDashboard, Package, PlusCircle, Settings, LogOut, ShoppingCart } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 type SidebarItemProps = {
   icon: LucideIcon;
@@ -11,6 +12,7 @@ type SidebarItemProps = {
 };
 
 const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
+  
   return (
     <Link
       to={href}
@@ -30,9 +32,11 @@ const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
 export function Sidebar() {
   const location = useLocation();
   const path = location.pathname;
+  const { logout } = useAuth(); // Auth function from context
+
 
   return (
-    <div className="absolute inset-y-0 left-0 top-20 z-50 flex   w-64 flex-col border-r bg-white p-4 shadow-sm animate-fade-in ">
+    <div className=" z-50 flex h-full w-64 flex-col  p-4 shadow-sm animate-fade-in rounded-lg ">
       {/* <div className="flex h-14 items-center px-4 border-b mb-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -78,7 +82,9 @@ export function Sidebar() {
             label="Settings" 
             href="/settings" 
           />
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-red-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600">
+          <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-red-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600">
             <LogOut className="h-5 w-5" />
             <span className="text-sm font-medium">Logout</span>
           </button>

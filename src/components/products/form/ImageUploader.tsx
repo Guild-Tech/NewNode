@@ -6,6 +6,8 @@ import { X } from "lucide-react";
 // import { useState } from "react";
 import { AdvancedImage, placeholder, responsive } from "@cloudinary/react";
 import CloudinaryUploadWidget from "../../cloudnary/CloudinaryUploadWidget";
+import { Button } from "../../ui/button";
+import { toast } from "sonner";
 
 type ImageUploaderProps = {
   // image: string;
@@ -44,6 +46,19 @@ export function ImageUploader({ onImageChange, publicId, setPublicId }: ImageUpl
     // maxImageWidth: 2000,
     // theme: 'purple',
   };
+
+  // const handleImageUpload = () => {
+  //   const widget = window.cloudinary.createUploadWidget(uwConfig, (error:any, result:any) => {
+  //     if (!error && result && result.event === "success") {
+  //       const imageUrl = result.info.secure_url;
+  //       onImageChange(imageUrl);
+  //       toast.success("Image uploaded successfully!");
+  //     } else {
+  //       toast.error("Image upload failed. Please try again.");
+  //     }
+  //   });
+  //   widget.open();
+  // };
 
 
   return (

@@ -38,7 +38,7 @@ export function CpuOptionsCard({
           <Plus className="h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent className="space-y-4 pt-3">
+      <CardContent className="space-y-4 pt-3 bg-white">
         {cpuOptions.map((option) => (
           <div key={option.id} className="grid grid-cols-[1fr,auto] gap-2">
             <div className="grid grid-cols-2 gap-2">

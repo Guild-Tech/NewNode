@@ -44,12 +44,12 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8 px-4 sm:px-6">
         <SectionHeader
           title="Dashboard"
           description="Welcome to your product management dashboard"
           action={
-            <Button asChild>
+            <Button asChild size="sm" className="w-full sm:w-auto">
               <Link to="/products/new">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
@@ -59,7 +59,7 @@ const Dashboard = () => {
         />
         
         {/* Cards Section */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="bg-blue-50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -104,16 +104,16 @@ const Dashboard = () => {
         </div>
 
         {/* Latest Products Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
             <h3 className="text-lg font-medium">Latest Products</h3>
-            <Button variant="outline" asChild size="sm">
+            <Button variant="outline" asChild size="sm" className="w-full sm:w-auto">
               <Link to="/dashboard-home">View all</Link>
             </Button>
           </div>
 
           {latestProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {latestProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -123,7 +123,7 @@ const Dashboard = () => {
               <CardContent className="flex flex-col items-center justify-center py-6">
                 <Package className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-muted-foreground mb-4">No products yet</p>
-                <Button asChild>
+                <Button asChild size="sm" className="w-full sm:w-auto">
                   <Link to="/products/new">
                     <Plus className="h-4 w-4 mr-2" />
                     Add New Product

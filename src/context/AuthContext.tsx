@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  admin: boolean; // Add admin property
+  admin: boolean;
   login: () => void;
   logout: () => void;
 }
@@ -10,17 +10,29 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [admin, setAdmin] = useState(false); // Track admin authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem("isAuthenticated") === "true";
+  });
+
+  const [admin, setAdmin] = useState(() => {
+    return localStorage.getItem("admin") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("isAuthenticated", String(isAuthenticated));
+    localStorage.setItem("admin", String(admin));
+  }, [isAuthenticated, admin]);
 
   const login = () => {
     setIsAuthenticated(true);
-    setAdmin(true); // Assume admin logs in
+    setAdmin(true);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setAdmin(false);
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("admin");
   };
 
   return (

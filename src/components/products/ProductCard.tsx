@@ -94,7 +94,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </Card>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="glass-panel">
+        <AlertDialogContent className="glass-panel bg-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>

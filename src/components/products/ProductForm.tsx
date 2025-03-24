@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   useProducts,
@@ -76,6 +76,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
       ...formState,
       [field]: field === "price" ? (value === "" ? "" : parseInt(value)) : value,
     });
+    
   };
 
   // CPU handlers
@@ -219,7 +220,9 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     // console.log("Submitting product update:", productData);
   };
 // console.log(publicId)
-
+  useEffect(() => {
+    setPublicId(existingProduct?.image || "");
+  }, [existingProduct])
 
   return (
     
@@ -241,7 +244,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
           publicId={publicId}
           setPublicId={setPublicId}
           // image={formState.image}
-          onImageChange={(publicId) => handleFieldChange("image", publicId)}
+          onImageChange={() => setPublicId("")}
         />
       </div>
 

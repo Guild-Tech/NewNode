@@ -8,7 +8,7 @@ interface CloudinaryUploadWidgetProps {
 
 const CloudinaryUploadWidget: React.FC<CloudinaryUploadWidgetProps> = ({ uwConfig, setPublicId }) => {
   const [uploadWidget, setUploadWidget] = useState<any>(null); // Replace 'any' with the appropriate type for the widget
-
+  // console.log("object")
   useEffect(() => {
     if (window?.cloudinary) {
       // Initialize the upload widget
@@ -24,6 +24,8 @@ const CloudinaryUploadWidget: React.FC<CloudinaryUploadWidgetProps> = ({ uwConfi
 
   const handleUploadClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); // Prevent default form submission behavior
+    console.log("object", uploadWidget)
+    
     if (uploadWidget) {
       uploadWidget.open();
     }
