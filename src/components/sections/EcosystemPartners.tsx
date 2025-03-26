@@ -10,7 +10,7 @@ export default function EcosystemPartners() {
   const partners = [
     {
       name: "Ethereum",
-      logo: "https://ethereum.org/static/4f10d2777b2d14759feb01c65b2765f7/69ce7/eth-glyph-colored.webp",
+      logo: "https://pbs.twimg.com/profile_images/1878738447067652096/tXQbWfpf_400x400.jpg",
       description: "The foundation of decentralized computing"
     },
     {
@@ -20,22 +20,22 @@ export default function EcosystemPartners() {
     },
     {
       name: "Base",
-      logo: "https://raw.githubusercontent.com/base-org/brand-kit/main/logo/base-logo.svg",
+      logo: "https://pbs.twimg.com/profile_images/1840800810571350019/1pCjLY5q_400x400.jpg",
       description: "The secure blockchain for everyone"
     },
     {
       name: "Lido",
-      logo: "https://lido.fi/static/images/lido-logo.svg",
+      logo: "https://pbs.twimg.com/profile_images/1721880644345622528/G2czctJJ_400x400.jpg",
       description: "Liquid staking protocol"
     },
     {
       name: "DappNode",
-      logo: "https://docs.dappnode.io/img/dappnode-logo-full.svg",
+      logo: "https://pbs.twimg.com/profile_images/1566755026529406977/783o8STM_400x400.jpg",
       description: "Node operation made easy"
     },
     {
       name: "EtherFi",
-      logo: "https://etherfi.io/images/logo.svg",
+      logo: "https://pbs.twimg.com/profile_images/1615130604328161281/FgQYpAa2_400x400.jpg",
       description: "Decentralized staking platform"
     }
   ];

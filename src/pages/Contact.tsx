@@ -16,15 +16,15 @@ export default function Contact() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">support@nodehub.example.com</span>
+                <a href='mailto:nodebridges@gmail.com' className="text-sm sm:text-base">nodebridges@gmail.com</a>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">+1 (555) 123-4567</span>
+                <a href='tel:+2347075687794' className="text-sm sm:text-base">+234 (707) 568-7794</a>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-green-500 flex-shrink-0" />
-                <span className="text-sm sm:text-base">123 Blockchain Street, Crypto City, CC 12345</span>
+                <span className="text-sm sm:text-base">12 alhaji abdulazeez crescent, Oreyo, Ikorodu 104102, Lagos</span>
               </div>
             </div>
           </div>

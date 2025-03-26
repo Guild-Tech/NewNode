@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
-import { Menu, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,50 +18,30 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { Sidebar } from "../../components/layout/Sidebar";
+import { DashboardLayout } from "../../components/layout/Dashboard";
+
+// Pagination constants
+const PAGE_SIZE = 20;
 
 export default function Orders() {
   const { orders } = useOrders();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate paginated orders
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return orders.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [orders, currentPage]);
+
+  const totalPages = Math.ceil(orders.length / PAGE_SIZE);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 lg:hidden z-40"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar with responsive behavior */}
-      <div
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
-      >
-        <Sidebar />
-      </div>
-
+    <DashboardLayout>
       {/* Main content area */}
       <div className="flex-1 overflow-x-auto">
-        {/* Mobile header with toggle button */}
-        <header className="lg:hidden sticky top-0 z-40 bg-white border-b p-4 flex items-center">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
-          >
-            {sidebarOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
-          <h1 className="ml-4 text-xl font-semibold">Orders</h1>
-        </header>
 
-        <div className="p-4 sm:p-6 lg:p-8 ">
-          <div className="max-w-6xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8">
+          <div className="max-w-full mx-auto">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">Orders</h1>
 
             <Card>
@@ -86,7 +65,7 @@ export default function Orders() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {orders.map((order) => (
+                      {paginatedOrders.map((order) => (
                         <TableRow key={order.orderID}>
                           <TableCell className="font-medium">
                             #{order.orderID}
@@ -122,12 +101,34 @@ export default function Orders() {
                       ))}
                     </TableBody>
                   </Table>
+                  {/* Pagination controls */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 border rounded-md disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+                      <span>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 border rounded-md disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
