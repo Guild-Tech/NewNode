@@ -173,10 +173,11 @@ console.log(selectedCurrency)
           onChange={(e) => setSelectedCurrency(e.target.value)}
           className="p-2 border rounded w-full"
         >
-          <option value="eth">Ethereum (ETH)</option>
-          <option value="usdtbsc">BSC (USDT)</option>
+          <option value="ethbase">Base (ETH)</option>
+          <option value="etharb">Arbitrum (ETH)</option>
         </select>
       </div>
     </div>
   );
 }
+
