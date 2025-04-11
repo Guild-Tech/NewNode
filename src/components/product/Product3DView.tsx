@@ -31,7 +31,7 @@ export default function Product3DView() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full h-[400px] bg-gray-900 rounded-lg overflow-hidden"
+      className="w-full h-[400px] bg-gray-300 rounded-lg overflow-hidden"
     >
       <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 50 }}>
         <Suspense fallback={null}>

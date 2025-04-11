@@ -1,7 +1,7 @@
 export const SUPPORTED_NODE_SOFTWARE = [
   'Dappnode',
   'Stereum',
-  'Sege',
+  'Sedge',
   'Coincashew',
   'Blockops'
 ] as const;
@@ -18,7 +18,8 @@ export const STORAGE_OPTIONS = {
 } as const;
 
 export const PROCESSOR_OPTIONS = {
-  "Intel i3": { label: 'Intel i3', price: 0 },
-  "Intel i5": { label: 'Intel i5', price: 150 },
-  "Intel i7": { label: 'Intel i7', price: 300 }
+  "Intel i3": { label: 'Core i3', price: 0 },
+  "Intel i5": { label: 'Core i5', price: 150 },
+  "Intel i7": { label: 'Core i7', price: 300 },
+  "Intel i9": { label: 'Core i9', price: 500 }
 } as const;

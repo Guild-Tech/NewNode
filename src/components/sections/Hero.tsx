@@ -114,8 +114,8 @@ export default function Hero() {
               {[
                 {
                   icon: Shield,
-                  title: "Pre-configured Security",
-                  description: "Enterprise-grade security measures built-in"
+                  title: "Energy-Efficient Security, Always Vigilant",
+                  description: "Minimal power usage, maximum protection—backed by 24/7 global response."
                 },
                 {
                   icon: Zap,

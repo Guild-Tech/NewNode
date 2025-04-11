@@ -8,10 +8,10 @@ export default function Stats() {
   });
 
   const stats = [
-    { value: "500+", label: "Nodes Deployed" },
+    { value: "50+", label: "Nodes Deployed" },
     { value: "99.9%", label: "Uptime" },
     { value: "24/7", label: "Support" },
-    { value: "50+", label: "Countries Served" }
+    { value: "7+", label: "Countries Served" }
   ];
 
   return (

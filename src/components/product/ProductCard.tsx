@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, Server, Shield, Zap, Eye } from 'lucide-react';
+import { ShoppingBag,  Eye } from 'lucide-react';
 import type { Product, NodeConfig } from '../../types';
 import { useCartStore } from '../../store/cartStore';
 import { calculatePrice } from '../../utils/price';
@@ -49,13 +49,13 @@ export default function ProductCard({ product }: ProductCardProps) {
             
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   {[Server, Shield, Zap].map((Icon, i) => (
                     <div key={i} className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                       <Icon className="h-4 w-4 text-white" />
                     </div>
                   ))}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

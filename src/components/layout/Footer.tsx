@@ -1,14 +1,14 @@
 import { Link } from 'react-router-dom';
 import { 
   Server, 
-  Github, 
-  Twitter, 
   MessageSquare,
   Mail,
   ArrowRight,
   Shield,
   Cpu,
-  HardDrive
+  HardDrive,
+  X,
+  MessageCircle
 } from 'lucide-react';
 
 export default function Footer() {
@@ -22,21 +22,25 @@ export default function Footer() {
           <div className="space-y-6">
             <div className="flex items-center space-x-2">
               <Server className="h-8 w-8 text-green-400" />
-              <span className="text-2xl font-bold">NODEHUB</span>
+              <span className="text-2xl font-bold">NODEFORGE</span>
             </div>
             <p className="text-gray-400">
               Empowering the Ethereum ecosystem with sustainable and reliable node infrastructure.
             </p>
             <div className="flex space-x-4">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" 
+              <a href="https://chat.whatsapp.com/IHlA8ZPoAXg7H7FvRYDK0W" target="_blank" rel="noopener noreferrer" 
                 className="text-gray-400 hover:text-green-400 transition-colors">
-                <Twitter className="h-5 w-5" />
+                <MessageCircle className="h-5 w-5" />
               </a>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://x.com/nodeforge1" target="_blank" rel="noopener noreferrer" 
+                className="text-gray-400 hover:text-green-400 transition-colors">
+                <X className="h-5 w-5" />
+              </a>
+              {/* <a href="https://github.com" target="_blank" rel="noopener noreferrer"
                 className="text-gray-400 hover:text-green-400 transition-colors">
                 <Github className="h-5 w-5" />
-              </a>
-              <a href="https://discord.com" target="_blank" rel="noopener noreferrer"
+              </a> */}
+              <a href="https://discord.com/channels/1359873217300529224/1359873217300529227" target="_blank" rel="noopener noreferrer"
                 className="text-gray-400 hover:text-green-400 transition-colors">
                 <MessageSquare className="h-5 w-5" />
               </a>
@@ -79,13 +83,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/documentation" className="text-gray-400 hover:text-green-400 transition-colors flex items-center group">
+                <a href="https://nodebridge-africa.gitbook.io/nodebridge-africa" className="text-gray-400 hover:text-green-400 transition-colors flex items-center group">
                   <ArrowRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                   Documentation
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/faq" className="text-gray-400 hover:text-green-400 transition-colors flex items-center group">
+                <Link to="/FAQPage" className="text-gray-400 hover:text-green-400 transition-colors flex items-center group">
                   <ArrowRight className="h-4 w-4 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                   FAQ
                 </Link>
@@ -145,7 +149,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-800 text-center md:flex md:justify-between md:items-center">
           <p className="text-gray-400 mb-4 md:mb-0">
-            © {currentYear} NODEHUB. All rights reserved.
+            © {currentYear} NODEFORGE. All rights reserved.
           </p>
           <div className="flex justify-center space-x-6">
             <Link to="/privacy" className="text-gray-400 hover:text-green-400 transition-colors text-sm">

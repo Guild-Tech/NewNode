@@ -26,6 +26,7 @@ export default function Header() {
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Products' },
     { path: '/about', label: 'About' },
+    { path: '/FAQPage', label: 'FAQ' },
     { path: '/contact', label: 'Contact' }
   ];
 
@@ -49,7 +50,7 @@ export default function Header() {
               <Server className="h-8 w-8 text-green-400" />
             </motion.div>
             <span className="text-2xl font-bold text-white group-hover:text-green-400 transition-colors">
-              NODEHUB
+            NODEFORGE
             </span>
           </Link>
 

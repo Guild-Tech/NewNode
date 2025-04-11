@@ -82,10 +82,7 @@ export function ProductInfoCard({
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="Laptop">Laptop</SelectItem>
-                <SelectItem value="Desktop">Desktop</SelectItem>
-                <SelectItem value="Tablet">Tablet</SelectItem>
-                <SelectItem value="Accessory">Accessory</SelectItem>
+                <SelectItem value="Node">Node Hardware</SelectItem>
               </SelectContent>
             </Select>
           </div>

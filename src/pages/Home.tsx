@@ -3,7 +3,7 @@ import Features from '../components/sections/Features';
 import Benefits from '../components/sections/Benefits';
 import EcosystemPartners from '../components/sections/EcosystemPartners';
 import Stats from '../components/sections/Stats';
-import Testimonials from '../components/sections/Testimonials';
+// import Testimonials from '../components/sections/Testimonials';
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
       <Benefits />
       <EcosystemPartners />
       <Stats />
-      <Testimonials />
+      {/* <Testimonials /> */}
     </main>
   );
 }

@@ -1,12 +1,9 @@
 import { useState } from "react";
-// import { useWeb3Modal } from '@web3modal/react';
-// import { useAccount } from "wagmi";
-//import DePay from '@depay/web3-payments';
-import { Wallet } from "lucide-react";
+import { Wallet, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 import { retrieveSystemInfoAsText } from "../../utils/convert to plainaText";
 import { useCartStore } from "../../store/cartStore";
-// import { v4 as uuidv4 } from "uuid";
 import { ShipmentFormData } from "./ShipmentDetails";
+// import QRCode from "react-qr-code";
 
 interface CryptoPaymentProps {
   amount: number;
@@ -21,21 +18,22 @@ export default function CryptoPayment({
   onSuccess,
   onError,
 }: CryptoPaymentProps) {
-  const [invoice_url, setInvoiceUrl] = useState<{
+  const [paymentData, setPaymentData] = useState<{
     invoice_url: string;
-    message: string;
+    payment_address: string;
+    payment_amount: string;
     payment_id: string;
   }>();
   const [isProcessing, setIsProcessing] = useState(false);
   const { items, getTotalPrice } = useCartStore();
   const [error, setError] = useState(false);
-  const [selectedCurrency, setSelectedCurrency] = useState("eth"); // Default ETH
+  const [selectedCurrency, setSelectedCurrency] = useState("ethbase");
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const order_description = `${retrieveSystemInfoAsText(
     items
   )}Total Price: ${getTotalPrice()}`;
-  // const order_id = uuidv4();
-console.log(selectedCurrency)
+
   const handleCryptoPayment = async () => {
     setIsProcessing(true);
     setError(false);
@@ -47,127 +45,88 @@ console.log(selectedCurrency)
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            pay_currency: selectedCurrency, // Ensure consistency
+            pay_currency: selectedCurrency,
             order_description,
-            shippingInfo: {
-              firstName: shippingDetails?.firstName || "",
-              lastName: shippingDetails?.lastName || "",
-              email: shippingDetails?.email || "",
-              phone: shippingDetails?.phone || "",
-              address: shippingDetails?.address || "",
-              city: shippingDetails?.city || "",
-              state: shippingDetails?.state || "",
-              zipCode: shippingDetails?.zipCode || "",
-              country: shippingDetails?.country || "",
-            },
-            line_items: [
-              {
-                price_data: {
-                  product_data: { name: "Product Name" },
-                  unit_amount: amount * 100,
-                },
-                quantity: 1,
+            shippingInfo: shippingDetails,
+            line_items: items.map(item => ({
+              price_data: {
+                product_data: { name: item.name },
+                unit_amount: item.totalPrice * 100,
               },
-            ],
+              quantity: item.quantity,
+            })),
           }),
         }
       );
   
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-  
-      const text = await response.text();
-      console.log("Raw Response:", text);
+      if (!response.ok) throw new Error(`Payment error: ${response.status}`);
       
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (error) {
-        console.error("❌ Invalid JSON response:", text);
-        throw new Error("Invalid JSON response from server");
-      }
-  
-      console.log("✅ Crypto Payment Response:", data);
-  
-      if (data?.invoice_url) {
-        setInvoiceUrl({
-          invoice_url: data.invoice_url,
-          message: "Redirecting to payment page",
-          payment_id: data.id || "",
-        });
-        onSuccess();
-      } else {
-        throw new Error("Missing invoice_url in response");
-      }
+      const data = await response.json();
+      if (!data?.payment_id) throw new Error("Payment gateway error");
+      
+      setPaymentData(data);
+      onSuccess();
     } catch (err: any) {
-      console.error("❌ Crypto Payment Error:", err);
+      console.error("Payment failed:", err);
       setError(true);
-      onError(err.message || "An error occurred");
+      onError(err.message || "Payment processing failed");
     } finally {
       setIsProcessing(false);
     }
   };
-  
+
+  const getCurrencySymbol = () => {
+    switch(selectedCurrency) {
+      case 'etharb': return 'ETH';
+      default: return 'ethbase';
+    }
+  };
+
   return (
-    <div className="p-6 border rounded-lg">
+    <div className="p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <Wallet className="h-6 w-6 text-green-500" />
-          <h3 className="text-lg font-semibold">Crypto Payment</h3>
+          <div>
+            <h3 className="text-lg font-semibold">Crypto Payment</h3>
+            <p className="text-sm text-gray-500">Secure blockchain transaction</p>
+          </div>
         </div>
-        <span className="text-xl font-bold">${amount}</span>
+        <span className="text-xl font-bold">${amount.toFixed(2)}</span>
       </div>
 
-      {/* {!isConnected && (
-        <div className="mb-4 p-4 bg-yellow-50 rounded-lg flex items-start space-x-2">
-          <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-yellow-700">
-            Please connect your wallet to proceed with the payment
-          </p>
-        </div>
-      )} */}
+      {/* Payment Instructions Toggle */}
+      <button 
+        onClick={() => setShowInstructions(!showInstructions)}
+        className="w-full mb-4 text-sm text-green-600 hover:text-green-800 flex items-center"
+      >
+        {showInstructions ? "Hide instructions" : "How to pay with crypto?"}
+        <ArrowRight className={`ml-1 h-4 w-4 transition-transform ${showInstructions ? 'rotate-90' : ''}`} />
+      </button>
 
-      {invoice_url?.invoice_url ? (
-        <>
-          <a
-            target="_blank"
-            href={`${invoice_url?.invoice_url}`}
-            className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-          >
-            Continue
-          </a>
-          <span className="text-xs text-gray-500">
-            you will be redirected to the payment page
-          </span>
-        </>
-      ) : (
-        <button
-          onClick={handleCryptoPayment}
-          disabled={isProcessing}
-          className="w-full bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-        >
-          {isProcessing ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-              <span>Processing...</span>
-            </>
-          ) : (
-            <>
-              <Wallet className="h-5 w-5" />
-              <span>{"Pay with Crypto"}</span>
-              {error && (
-                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-500 opacity-75">
-                  {invoice_url?.message}
-                </span>
-              )}
-            </>
-          )}
-        </button>
+      {showInstructions && (
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 className="font-medium mb-2 flex items-center">
+            <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+            Crypto Payment Instructions
+          </h4>
+          <ol className="list-decimal pl-5 space-y-2 text-sm text-gray-700">
+            <li>Select your preferred cryptocurrency network</li>
+            <li>Choose your payment method below</li>
+            <li>You'll be redirected to the payment gateway</li>
+            <li>Complete the payment process by copying the address / QR code or connect to your wallet</li>
+            <li>Send the exact amount ({paymentData?.payment_amount || '...'} {getCurrencySymbol()})</li>
+            <li>Wait for blockchain confirmation (usually 1-3 minutes)</li>
+            <li>You'll receive confirmation email once processed</li>
+          </ol>
+        </div>
       )}
 
-      <div className="mt-4 text-sm text-gray-500">
-        <label>Select Cryptocurrency:</label>
+      {/* Currency Selection */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Select Network
+        </label>
         <select
           value={selectedCurrency}
           onChange={(e) => setSelectedCurrency(e.target.value)}
@@ -176,8 +135,69 @@ console.log(selectedCurrency)
           <option value="ethbase">Base (ETH)</option>
           <option value="etharb">Arbitrum (ETH)</option>
         </select>
+        <p className="mt-1 text-xs text-gray-500">
+          Gas fees vary by network. Base recommended for lowest fees.
+        </p>
       </div>
+
+      {/* Payment Options */}
+      {paymentData ? (
+        <div className="space-y-4">
+
+          <div className="flex gap-3">
+            <a
+              href={paymentData.invoice_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-colors flex items-center justify-center space-x-2 text-sm"
+            >
+              <Wallet className="h-4 w-4" />
+              <span>Proceed</span>
+            </a>
+            {/* <button
+              onClick={() => setPaymentData(undefined)}
+              className="bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center space-x-2 text-sm"
+            >
+              <span>Change Method</span>
+            </button> */}
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={handleCryptoPayment}
+          disabled={isProcessing}
+          className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 px-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-colors disabled:opacity-75 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+        >
+          {isProcessing ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+              <span>Generating Payment...</span>
+            </>
+          ) : (
+            <>
+              <Wallet className="h-5 w-5" />
+              <span>Generate Payment Details</span>
+            </>
+          )}
+        </button>
+      )}
+
+      {/* Security Disclaimer */}
+      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+        <p className="text-xs text-blue-700 flex items-start">
+          <svg className="h-3 w-3 mt-0.5 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clipRule="evenodd" />
+          </svg>
+          All crypto payments are processed securely on-chain. We never store your wallet information.
+        </p>
+      </div>
+
+      {error && (
+        <div className="mt-3 p-2 bg-red-50 rounded flex items-start text-sm text-red-600">
+          <AlertCircle className="h-4 w-4 mt-0.5 mr-2 flex-shrink-0" />
+          <span>Payment failed. Please try again or contact support.</span>
+        </div>
+      )}
     </div>
   );
 }
-

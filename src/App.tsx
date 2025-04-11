@@ -16,6 +16,7 @@ import NotFound from "./pages/dashboard/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import RequireAuth from "./components/auth/RequireAuth";
 import Login from "./pages/dashboard/Login";
+import FAQPage from "./pages/FAQ";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/FAQPage" element={<FAQPage />} />
             <Route path="/login" element={<Login />} />
             <Route element={<RequireAuth />}>
               <Route path="/dashboard" element={<Dashboard />} />
