@@ -1,4 +1,4 @@
-  const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
   // Define the product schema
   const productSchema = new mongoose.Schema({
@@ -28,7 +28,7 @@
         type: String,
         enum: ['Dappnode', 'Stereum', 'Sedge', 'Coincashew', 'Blockops'], // Available software options
         required: true,
-        default: 'Dappnode', // Default selection
+        default: 'Coincashew', // Default selection
       },
       ram: {
         type: String,
@@ -44,7 +44,8 @@
       },
       processor: {
         type: String,
-        enum: ['Core i3', 'Core i5', 'Core i7', "Core i9"], // Processor choices
+
+        enum: ['Core i3', 'Core i5', 'Core i7', 'Core i9'], // Processor choices
         required: true,
         default: 'Core i3', // Default processor
       },
