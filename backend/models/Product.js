@@ -44,7 +44,6 @@ const mongoose = require('mongoose');
       },
       processor: {
         type: String,
-
         enum: ['Core i3', 'Core i5', 'Core i7', 'Core i9'], // Processor choices
         required: true,
         default: 'Core i3', // Default processor

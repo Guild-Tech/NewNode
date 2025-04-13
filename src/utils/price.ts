@@ -6,7 +6,7 @@ export function calculatePrice(price: number, config: { software?: string; ram?:
      // Ensure a default is set
     ram = "16GB", 
     storage = "2TB SSD", 
-    processor = "Intel i3" 
+    processor = "Core i3" 
   } = config;
 
 

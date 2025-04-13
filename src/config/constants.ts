@@ -18,8 +18,8 @@ export const STORAGE_OPTIONS = {
 } as const;
 
 export const PROCESSOR_OPTIONS = {
-  "Intel i3": { label: 'Core i3', price: 0 },
-  "Intel i5": { label: 'Core i5', price: 150 },
-  "Intel i7": { label: 'Core i7', price: 300 },
-  "Intel i9": { label: 'Core i9', price: 500 }
+  "Core i3": { label: 'Core i3', price: 0 },
+  "Core i5": { label: 'Core i5', price: 150 },
+  "Core i7": { label: 'Core i7', price: 300 },
+  "Core i9": { label: 'Core i9', price: 500 }
 } as const;
