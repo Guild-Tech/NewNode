@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+    <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
       {/* Animated background particles */}
       <div className="absolute inset-0">
         {[...Array(50)].map((_, i) => (
@@ -114,8 +114,8 @@ export default function Hero() {
               {[
                 {
                   icon: Shield,
-                  title: "Energy-Efficient Security, Always Vigilant",
-                  description: "Minimal power usage, maximum protection—backed by 24/7 global response."
+                  title: "Energy-Efficient Security",
+                  description: "backed by 24/7 global response."
                 },
                 {
                   icon: Zap,

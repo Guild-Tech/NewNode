@@ -4,6 +4,8 @@ const axios = require("axios");
 const router = express.Router();
 const Order = require("../models/Order");
 const nodemailer = require("nodemailer");
+const { custom } = require("wagmi");
+const validator = require('validator');
 
 // Initialize Nodemailer transporter (example using Gmail)
 const transporter = nodemailer.createTransport({
@@ -21,22 +23,23 @@ const YOUR_DOMAIN = process.env.DOMAIN;
 // Route to create a NowPayments crypto payment
 router.post("/create-crypto-payment", async (req, res) => {
   try {
-    console.log("Received request to create crypto payment:", req.body);
-    const { line_items, order_description, shippingInfo, pay_currency } = req.body;
+    // console.log("Received request to create crypto payment:", req.body);
+    const { line_items, order_description, shippingInfo, pay_currency, customer } = req.body;
 
-    if (!shippingInfo) {
+    if (!shippingInfo || !customer) {
       console.error("Missing shippingInfo object");
       return res.status(400).json({ error: "Missing shippingInfo object" });
     }
 
     const orderID = "CRYPTO-" + Date.now();
-    const email = shippingInfo.email?.trim();
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const email = customer.email?.trim();
+    console.log("Email address:", email);
+    if (!validator.isEmail(email)) {
+      // handle error
       console.error("Invalid email address");
       return res.status(400).json({ error: "Invalid email address" });
     }
-
+    console.log("Email address is valid:", email);
     const totalAmountUSD = line_items.reduce((sum, item) => {
       return sum + (item.price_data.unit_amount / 100) * (item.quantity || 1);
     }, 0);
@@ -48,8 +51,11 @@ router.post("/create-crypto-payment", async (req, res) => {
       orderID,
       order_description,
       shippingInfo,
+      customer,
       totalPrice: totalAmountUSD,
-      orderStatus: "Pending",
+      orderStatus: "pending",
+      paymentMethod: "crypto",
+      subtotal: totalAmountUSD,
       warranty: "2 years",
       shippingPolicy: "Free shipping on orders above $500",
       customerSupport: "24/7 Customer support via Live chat and Telegram",
@@ -64,9 +70,9 @@ router.post("/create-crypto-payment", async (req, res) => {
       {
         price_amount: totalAmountUSD,
         price_currency: "usd",
-        pay_currency: pay_currency || "btc",
+        pay_currency: pay_currency || "ethbase",
         order_id: savedOrder._id.toString(),
-        order_description,
+        order_description: JSON.stringify(order_description),
         ipn_callback_url: `${YOUR_DOMAIN}/api/crypto/webhook`,
         success_url: `${YOUR_DOMAIN}/success`,
         cancel_url: `${YOUR_DOMAIN}/canceled`,

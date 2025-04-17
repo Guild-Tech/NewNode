@@ -39,7 +39,7 @@ export default function Products() {
         setIsLoading(false);
       });
   }, []);
-
+// console.log(products)
   const [currentPage, setCurrentPage] = useState(1);
 
   // Calculate the total number of pages based on products length

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Wallet, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
-import { retrieveSystemInfoAsText } from "../../utils/convert to plainaText";
+// import { retrieveSystemInfoAsText } from "../../utils/convert to plainaText";
 import { useCartStore } from "../../store/cartStore";
 import { ShipmentFormData } from "./ShipmentDetails";
 // import QRCode from "react-qr-code";
@@ -8,13 +8,19 @@ import { ShipmentFormData } from "./ShipmentDetails";
 interface CryptoPaymentProps {
   amount: number;
   shippingDetails: ShipmentFormData | null;
+  productData: any;
+  shippingInfo: any;
+  customer: any
   onSuccess: () => void;
   onError: (error: string) => void;
 }
 
 export default function CryptoPayment({
   amount,
-  shippingDetails,
+  // shippingDetails,
+  productData,
+  shippingInfo,
+  customer,
   onSuccess,
   onError,
 }: CryptoPaymentProps) {
@@ -25,45 +31,76 @@ export default function CryptoPayment({
     payment_id: string;
   }>();
   const [isProcessing, setIsProcessing] = useState(false);
-  const { items, getTotalPrice } = useCartStore();
+  const { getTotalPrice } = useCartStore();
   const [error, setError] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("ethbase");
   const [showInstructions, setShowInstructions] = useState(false);
 
-  const order_description = `${retrieveSystemInfoAsText(
-    items
-  )}Total Price: ${getTotalPrice()}`;
+  // const order_description = `${retrieveSystemInfoAsText(
+  //   items
+  // )}Total Price: ${getTotalPrice()}`;
 
   const handleCryptoPayment = async () => {
     setIsProcessing(true);
     setError(false);
-  
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/create-crypto-payment`,
         {
+          // 'customer', 'products', 'totalPrice', 'paymentMethod'
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            pay_currency: selectedCurrency,
-            order_description,
-            shippingInfo: shippingDetails,
-            line_items: items.map(item => ({
-              price_data: {
-                product_data: { name: item.name },
-                unit_amount: item.totalPrice * 100,
+          body:
+            JSON.stringify({
+              orderID: `${Date.now().toString()}`,
+              customer,
+              shippingInfo,
+              products: productData,
+              pay_currency: selectedCurrency,
+              order_description: `${productData.map((item: any) => { item.name, item.quantity }).join(", ")} Total Price: ${getTotalPrice()}`,
+              billingInfo: {
+                sameAsShipping: true,
               },
-              quantity: item.quantity,
-            })),
-          }),
+
+              subtotal: getTotalPrice(),
+              shippingCost: 0,
+              tax: 0,
+              discount: 0,
+              totalPrice: getTotalPrice(),
+
+              paymentMethod: "crypto",
+              paymentStatus: "pending",
+              orderStatus: "Pending",
+              trackingInfo: {
+                carrier: "",
+                trackingNumber: "",
+                trackingUrl: "",
+                estimatedDelivery: new Date(),
+              },
+              notes: "",
+              stripe_session_id: "",
+
+              line_items: [
+                {
+                  price_data: {
+                    currency: "usd",
+                    product_data: { name: "Product Name" },
+                    unit_amount: amount * 100,
+                  },
+                  quantity: 1,
+                },
+              ],
+            }
+          ),
         }
       );
-  
+      console.log(response)
       if (!response.ok) throw new Error(`Payment error: ${response.status}`);
-      
+
       const data = await response.json();
       if (!data?.payment_id) throw new Error("Payment gateway error");
-      
+
       setPaymentData(data);
       onSuccess();
     } catch (err: any) {
@@ -76,7 +113,7 @@ export default function CryptoPayment({
   };
 
   const getCurrencySymbol = () => {
-    switch(selectedCurrency) {
+    switch (selectedCurrency) {
       case 'etharb': return 'ETH';
       default: return 'ethbase';
     }
@@ -96,7 +133,7 @@ export default function CryptoPayment({
       </div>
 
       {/* Payment Instructions Toggle */}
-      <button 
+      <button
         onClick={() => setShowInstructions(!showInstructions)}
         className="w-full mb-4 text-sm text-green-600 hover:text-green-800 flex items-center"
       >

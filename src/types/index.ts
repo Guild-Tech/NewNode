@@ -1,17 +1,18 @@
 import { PROCESSOR_OPTIONS, RAM_OPTIONS, STORAGE_OPTIONS } from "../config/constants";
 
 export interface NodeConfig {
-  software: 'Dappnode' | 'Stereum' | 'Sege' | 'Coincashew' | 'Blockops';
-  ram: '16GB' | '32GB' | '64GB';
-  storage: '2TB SSD' | '4TB SSD';
-  processor: 'Intel i3' | 'Intel i5' | 'Intel i7';
+  software: string;
+  ram: string;
+  storage: string;
+  processor: string;
 }
 
 export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
+  basePrice: number;
+  price?: number;
   image: string;
   specs: {
     software: string;
@@ -19,6 +20,7 @@ export interface Product {
     storage: string;
     processor: string;
   };
+
 }
 
 export interface CartItem extends Product {

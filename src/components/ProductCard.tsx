@@ -22,7 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const price = product.price;
-  const pricec = calculatePrice(price, config);
+  const pricec = calculatePrice(price as number, config);
   console.log(pricec);
 
   return (

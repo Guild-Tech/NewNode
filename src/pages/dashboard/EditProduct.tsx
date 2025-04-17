@@ -11,13 +11,13 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const { getProduct } = useProducts();
 
-  const productId = id ? Number(id) : undefined; // Convert id to number
-  const product = productId ? getProduct(productId) : undefined;
+  const productId = id ? id : undefined; // Convert id to number
+  const product = productId ? getProduct(productId as any) : undefined;
 
   useEffect(() => {
     if (!product) {
       toast.error("Product not found");
-      navigate("/dashboard/products"); // Redirect to products list if not found
+      // navigate("/dashboard/products"); // Redirect to products list if not found
     }
   }, [product, navigate]);
 

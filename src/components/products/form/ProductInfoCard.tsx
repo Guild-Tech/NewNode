@@ -1,4 +1,3 @@
-
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { Label } from "../../../components/ui/label";
@@ -14,29 +13,43 @@ import {
 type ProductInfoCardProps = {
   name: string;
   description: string;
-  price: number;
-  category: string;
+  basePrice: number;
   onNameChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
-  onpriceChange: (value: number) => void;
-  onCategoryChange: (value: string) => void;
+  onPriceChange: (value: number) => void;
+  defaultProcessor: string;
+  defaultRam: string;
+  defaultStorage: string;
+  onDefaultProcessorChange: (value: string) => void;
+  onDefaultRamChange: (value: string) => void;
+  onDefaultStorageChange: (value: string) => void;
+  processorOptions: string[];
+  ramOptions: string[];
+  storageOptions: string[];
 };
 
 export function ProductInfoCard({
   name,
   description,
-  price,
-  category,
+  basePrice,
   onNameChange,
   onDescriptionChange,
-  onpriceChange,
-  onCategoryChange,
+  onPriceChange,
+  defaultProcessor,
+  defaultRam,
+  defaultStorage,
+  onDefaultProcessorChange,
+  onDefaultRamChange,
+  onDefaultStorageChange,
+  processorOptions,
+  ramOptions,
+  storageOptions,
 }: ProductInfoCardProps) {
   return (
     <Card className="lg:col-span-2 overflow-hidden">
       <CardHeader>
         <CardTitle>Product Information</CardTitle>
-        <CardDescription>Basic details about your product</CardDescription>
+        <CardDescription>Basic details and default specifications</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -60,29 +73,75 @@ export function ProductInfoCard({
             className="min-h-[120px]"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="basePrice">Base Price ($)</Label>
+          <Input
+            id="basePrice"
+            name="basePrice"
+            type="number"
+            min="0"
+            value={basePrice}
+            onChange={(e) => onPriceChange(parseInt(e.target.value) || 0)}
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Default Processor Selection */}
           <div className="space-y-2">
-            <Label htmlFor="price">Base Price ($)</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              min="0"
-              value={price}
-              onChange={(e) => onpriceChange(parseInt(e.target.value) || 0)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="defaultProcessor">Default Processor</Label>
             <Select 
-              value={category} 
-              onValueChange={(value: any) => onCategoryChange(value)}
+              value={defaultProcessor} 
+              onValueChange={onDefaultProcessorChange}
             >
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select category" />
+              <SelectTrigger id="defaultProcessor">
+                <SelectValue placeholder="Select processor" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="Node">Node Hardware</SelectItem>
+              <SelectContent>
+                {processorOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Default RAM Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="defaultRam">Default RAM</Label>
+            <Select 
+              value={defaultRam} 
+              onValueChange={onDefaultRamChange}
+            >
+              <SelectTrigger id="defaultRam">
+                <SelectValue placeholder="Select RAM" />
+              </SelectTrigger>
+              <SelectContent>
+                {ramOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Default Storage Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="defaultStorage">Default Storage</Label>
+            <Select 
+              value={defaultStorage} 
+              onValueChange={onDefaultStorageChange}
+            >
+              <SelectTrigger id="defaultStorage">
+                <SelectValue placeholder="Select storage" />
+              </SelectTrigger>
+              <SelectContent>
+                {storageOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

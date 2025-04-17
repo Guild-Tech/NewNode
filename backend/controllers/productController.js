@@ -1,5 +1,4 @@
 const { Product } = require('../models/Product');
-const { v4: uuidv4 } = require('uuid'); // Import UUID for generating unique IDs
 
 // Get all products
 const getAllProducts = async (req, res) => {
@@ -14,7 +13,7 @@ const getAllProducts = async (req, res) => {
 // Get a single product by `id`
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findOne({ id: req.params.id });
+    const product = await Product.findById(req.params.id );
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -27,21 +26,23 @@ const getProductById = async (req, res) => {
 // Create a new product with a unique `id`
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, image, specs } = req.body;
-
-    if (!name || !description || !price || !image || !specs) {
+    const { name, description, basePrice, image, specs, options } = req.body;
+    console.log(req.body)
+    if (!name || !description || !basePrice || !image || !specs || !options) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
+    // Generate a unique ID if not provided
     const productId = req.body.id ? Number(req.body.id) : Date.now();
 
     const newProduct = new Product({
       id: productId,
       name,
       description,
-      price,
+      basePrice,
       image,
       specs,
+      options
     });
 
     await newProduct.save();
@@ -51,17 +52,33 @@ const createProduct = async (req, res) => {
   }
 };
 
-// Update an existing product by `id`
-const normalizeSpecs = (specs) => ({
-  ...specs,
-  ram: specs.ram.replace(' RAM', ''), // Remove " RAM" from input
-});
+// Normalize product specifications before update
+const normalizeSpec = (specs) => {
+  if (!specs) return specs;
+  
+  return {
+    ...specs,
+    defaultSpecs: {
+      ...specs.defaultSpecs,
+      // Remove any unwanted suffixes if needed
+      ram: specs.defaultSpecs?.ram?.replace(' RAM', '') || specs.defaultSpecs?.ram
+    }
+  };
+};
 
+// Update an existing product by `id`
 const updateProduct = async (req, res) => {
   try {
-    const updatedProduct = await Product.findOneAndUpdate(
-      { id: req.params.id },
-      { ...req.body, specs: normalizeSpecs(req.body.specs) }, // Normalize specs before updating
+    const updateData = { ...req.body };
+    
+    // Normalize spec if it exists in the update data
+    if (updateData.spec) {
+      updateData.spec = normalizeSpec(updateData.spec);
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id ,
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -75,11 +92,10 @@ const updateProduct = async (req, res) => {
   }
 };
 
-
 // Delete a product by `id`
 const deleteProduct = async (req, res) => {
   try {
-    const deletedProduct = await Product.findOneAndDelete({ id: req.params.id });
+    const deletedProduct = await Product.findByIdAndDelete( req.params.id );
     if (!deletedProduct) {
       return res.status(404).json({ message: 'Product not found' });
     }

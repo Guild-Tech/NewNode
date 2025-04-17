@@ -1,31 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useProducts,
-  // Product,
-  CPU,
-  RAM,
-  Storage,
-} from "../../context/ProductContext";
-import {
-  PROCESSOR_OPTIONS,
-  RAM_OPTIONS,
-  STORAGE_OPTIONS,
-} from "../../config/constants";
-// import { Button } from "../../components/ui/button";
+import { useProducts } from "../../context/ProductContext";
 import { ProductInfoCard } from "./form/ProductInfoCard";
 import { ImageUploader } from "./form/ImageUploader";
 import { CpuOptionsCard } from "./form/CpuOptionsCard";
 import { RamOptionsCard } from "./form/RamOptionsCard";
 import { StorageOptionsCard } from "./form/StorageOptionsCard";
+import { SoftwareOptionsCard } from "./form/SoftwareOptionsCard";
 import { validateProductForm, ProductFormData } from "./form/FormValidator";
-import { PROCESSOROptionKey, RAMOptionKey, STORAGEOptionKey } from "../../types";
 import { Button } from "../ui/button";
-// import { UploadImg } from "../cloudnary/UploadImg";
+import { toast } from "sonner";
 
 type ProductFormProps = {
   editMode?: boolean;
-  productId?: number;
+  productId?: string;
 };
 
 export function ProductForm({ editMode = false, productId }: ProductFormProps) {
@@ -33,160 +21,242 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
   const { addProduct, updateProduct, getProduct } = useProducts();
   const [publicId, setPublicId] = useState('');
 
-
   const existingProduct = productId ? getProduct(productId) : undefined;
 
-
-
-  const [formState, setFormState] = useState<ProductFormData | any>({
+  const [formState, setFormState] = useState({
     name: existingProduct?.name || "",
-    description: existingProduct?.details || "",
-    price: existingProduct?.price || 0,
-    image:
-      existingProduct?.image ||
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=2071&auto=format&fit=crop",
-    category: existingProduct?.category || "Laptop",
-    software: existingProduct?.specs?.software || "Dappnode", // Include software
-    cpuOptions: existingProduct?.specs?.processor
-      ? Object.keys(PROCESSOR_OPTIONS).map((key) => ({
-        id: key,
-        name: PROCESSOR_OPTIONS[key as PROCESSOROptionKey].label,
-        price: PROCESSOR_OPTIONS[key as PROCESSOROptionKey].price,
-      }))
-      : [],
-    ramOptions: existingProduct?.specs?.ram
-      ? Object.keys(RAM_OPTIONS).map((key) => ({
-        id: key,
-        size: RAM_OPTIONS[key as RAMOptionKey].label,
-        price: RAM_OPTIONS[key  as RAMOptionKey].price,
-      }))
-      : [],
-    storageOptions: existingProduct?.specs?.storage
-      ? Object.keys(STORAGE_OPTIONS).map((key) => ({
-        id: key,
-        type: "SSD",
-        size: STORAGE_OPTIONS[key as STORAGEOptionKey].label,
-        price: STORAGE_OPTIONS[key as STORAGEOptionKey].price,
-      }))
-      : [],
+    description: existingProduct?.description || "",
+    basePrice: existingProduct?.basePrice || 0,
+    image: existingProduct?.image || "j",
+    specs: {
+      software: existingProduct?.specs?.software || "Coincashew",
+      defaultSpecs: {
+        processor: existingProduct?.specs?.defaultSpecs?.processor || "Core i3",
+        ram: existingProduct?.specs?.defaultSpecs?.ram || "16GB",
+        storage: existingProduct?.specs?.defaultSpecs?.storage || "2TB SSD"
+      }
+    },
+    options: {
+      software: existingProduct?.options?.software.map((option: any) => ({ name: option.name, price: option.price })) || [
+        { name: "Coincashew", price: 0 }
+      ],
+      processor: existingProduct?.options?.processor.map((option: any) => ({ model: option.model, price: option.price })) || [
+        { model: "Core i3", price: 0 },
+      ],
+      ram: existingProduct?.options?.ram.map((option: any) => ({ size: option.size, price: option.price })) || [
+        { size: "16GB", price: 0 },
+      ],
+      storage: existingProduct?.options?.storage.map((option: any) => ({ type: option.type, price: option.price })) || [
+        { type: "2TB SSD", price: 0 },
+      ]
+    }
   });
+  console.log(existingProduct?.options)
+
   // Field change handlers
   const handleFieldChange = (field: keyof ProductFormData, value: any) => {
-    setFormState({
-      ...formState,
-      [field]: field === "price" ? (value === "" ? "" : parseInt(value)) : value,
-    });
-    
+    setFormState(prev => ({
+      ...prev,
+      [field]: field === "basePrice" ? (value === "" ? "" : Number(value)) : value,
+    }));
+  };
+
+  // Default specs handlers
+  const handleDefaultSpecChange = (field: keyof typeof formState.specs.defaultSpecs, value: string) => {
+    setFormState(prev => ({
+      ...prev,
+      specs: {
+        ...prev.specs,
+        defaultSpecs: {
+          ...prev.specs.defaultSpecs,
+          [field]: value
+        }
+      }
+    }));
+  };
+
+
+  // Software handlers
+  const handleAddSoftwareOption = () => {
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        software: [
+          ...prev.options.software,
+          { name: "", price: 0 }
+        ]
+      }
+    }));
+  };
+
+  const handleRemoveSoftwareOption = (index: number) => {
+    const updatedOptions = [...formState.options.software];
+    updatedOptions.splice(index, 1);
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        software: updatedOptions
+      }
+    }));
+  };
+
+  const handleSoftwareOptionChange = (index: number, field: keyof typeof formState.options.software[0], value: string) => {
+    const updatedOptions = [...formState.options.software];
+    updatedOptions[index] = {
+      ...updatedOptions[index],
+      [field]: field === "price" ? Number(value) : value
+    };
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        software: updatedOptions
+      }
+    }));
   };
 
   // CPU handlers
+  // console.log(formState)
   const handleAddCpuOption = () => {
-    setFormState({
-      ...formState,
-      cpuOptions: [
-        ...formState.cpuOptions as any,
-        { id: Date.now().toString(), name: "", price: 0 },
-      ],
+    setFormState(prev => {
+      // Validate existing options first
+
+      const hasEmptyOption = prev.options.processor.some(
+        opt => !opt.model.trim() || isNaN(opt.price)
+      );
+      
+      if (hasEmptyOption) {
+        toast.error("Please fill out all existing CPU options before adding new ones");
+        return prev;
+      }
+  
+      // Add new option with unique temporary ID
+      // return prev
+      return {
+        ...prev,
+        options: {
+          ...prev.options,
+          processor: [
+            ...prev.options.processor,
+            { 
+              model: "Core i3", 
+              price: 0,
+            }
+          ]
+        }
+      };
     });
   };
 
-  const handleRemoveCpuOption = (id: string) => {
-    setFormState({
-      ...formState,
-      cpuOptions: formState.cpuOptions.filter((option: any) => option.id !== id),
-    });
+  const handleRemoveCpuOption = (index: number) => {
+    const updatedOptions = [...formState.options.processor];
+    updatedOptions.splice(index, 1);
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        processor: updatedOptions
+      }
+    }));
   };
 
-  const handleCpuOptionChange = (
-    id: string,
-    field: keyof CPU,
-    value: string
-  ) => {
-    setFormState({
-      ...formState,
-      cpuOptions: formState.cpuOptions.map((option: any) =>
-        option.id === id
-          ? {
-            ...option,
-            [field]: field === "price" ? parseFloat(value) || 0 : value,
-          }
-          : option
-      ),
-    });
+  const handleCpuOptionChange = (index: number, field: keyof typeof formState.options.processor[0], value: string) => {
+    const updatedOptions = [...formState.options.processor];
+    updatedOptions[index] = {
+      ...updatedOptions[index],
+      [field]: field === "price" ? Number(value) : value
+    };
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        processor: updatedOptions
+      }
+    }));
   };
 
   // RAM handlers
   const handleAddRamOption = () => {
-    setFormState({
-      ...formState,
-      ramOptions: [
-        ...formState.ramOptions,
-        { id: Date.now().toString(), size: "", price: 0 },
-      ],
-    });
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        ram: [
+          ...prev.options.ram,
+          { size: "16GB", price: 0 }
+        ]
+      }
+    }));
   };
 
-  const handleRemoveRamOption = (id: string) => {
-    setFormState({
-      ...formState,
-      ramOptions: formState.ramOptions.filter((option: any) => option.id !== id),
-    });
+  const handleRemoveRamOption = (index: number) => {
+    const updatedOptions = [...formState.options.ram];
+    updatedOptions.splice(index, 1);
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        ram: updatedOptions
+      }
+    }));
   };
 
-  const handleRamOptionChange = (
-    id: string,
-    field: keyof RAM,
-    value: string
-  ) => {
-    setFormState({
-      ...formState,
-      ramOptions: formState.ramOptions.map((option: any) =>
-        option.id === id
-          ? {
-            ...option,
-            [field]: field === "price" ? parseFloat(value) || 0 : value,
-          }
-          : option
-      ),
-    });
+  const handleRamOptionChange = (index: number, field: keyof typeof formState.options.ram[0], value: string) => {
+    const updatedOptions = [...formState.options.ram];
+    updatedOptions[index] = {
+      ...updatedOptions[index],
+      [field]: field === "price" ? Number(value) : value
+    };
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        ram: updatedOptions
+      }
+    }));
   };
 
   // Storage handlers
   const handleAddStorageOption = () => {
-    setFormState({
-      ...formState,
-      storageOptions: [
-        ...formState.storageOptions,
-        { id: Date.now().toString(), type: "SSD", size: "", price: 0 },
-      ],
-    });
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        storage: [
+          ...prev.options.storage,
+          { type: "2TB SSD", price: 0 }
+        ]
+      }
+    }));
   };
 
-  const handleRemoveStorageOption = (id: string) => {
-    setFormState({
-      ...formState,
-      storageOptions: formState.storageOptions.filter(
-        (option: any) => option.id !== id
-      ),
-    });
+  const handleRemoveStorageOption = (index: number) => {
+    const updatedOptions = [...formState.options.storage];
+    updatedOptions.splice(index, 1);
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        storage: updatedOptions
+      }
+    }));
   };
 
-  const handleStorageOptionChange = (
-    id: string,
-    field: keyof Storage,
-    value: string
-  ) => {
-    setFormState({
-      ...formState,
-      storageOptions: formState.storageOptions.map((option: any) =>
-        option.id === id
-          ? {
-            ...option,
-            [field]: field === "price" ? parseFloat(value) || 0 : value,
-          }
-          : option
-      ),
-    });
+  const handleStorageOptionChange = (index: number, field: keyof typeof formState.options.storage[0], value: string) => {
+    const updatedOptions = [...formState.options.storage];
+    updatedOptions[index] = {
+      ...updatedOptions[index],
+      [field]: field === "price" ? Number(value) : value
+    };
+    setFormState(prev => ({
+      ...prev,
+      options: {
+        ...prev.options,
+        storage: updatedOptions
+      }
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -199,72 +269,88 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
     const productData = {
       name: formState.name,
       description: formState.description,
-      price: formState.price,
-      image: publicId,
+      basePrice: formState.basePrice,
+      image: publicId || formState.image,
       specs: {
-        software: formState.software,
-        processor:
-          formState.cpuOptions.length > 0 ? formState.cpuOptions[0].name : "Intel i3",
-        ram: formState.ramOptions.length > 0 ? formState.ramOptions[0].size : "16GB",
-        storage: formState.storageOptions.length > 0 ? formState.storageOptions[0].size : "2TB SSD",
+        software: formState.specs.software,
+        defaultSpecs: {
+          processor: formState.specs.defaultSpecs.processor,
+          ram: formState.specs.defaultSpecs.ram,
+          storage: formState.specs.defaultSpecs.storage
+        }
       },
+      options: {
+        software: formState.options.software,
+        processor: formState.options.processor,
+        ram: formState.options.ram,
+        storage: formState.options.storage
+      }
     };
-// console.log(productData)
+
     if (editMode && productId) {
       updateProduct(productId, productData);
     } else {
-      addProduct(productData as any);
+      addProduct(productData);
     }
 
     navigate("/dashboard-home");
-    // console.log("Submitting product update:", productData);
   };
-// console.log(publicId)
+
   useEffect(() => {
     setPublicId(existingProduct?.image || "");
-  }, [existingProduct])
+  }, [existingProduct]);
 
   return (
-    
-    <form  onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ProductInfoCard
           name={formState.name}
           description={formState.description}
-          price={formState.price}
-          category={formState.category}
+          basePrice={formState.basePrice}
           onNameChange={(value) => handleFieldChange("name", value)}
-          onDescriptionChange={(value) =>
-            handleFieldChange("description", value)
-          }
-          onpriceChange={(value) => handleFieldChange("price", value)}
-          onCategoryChange={(value) => handleFieldChange("category", value)}
+          onDescriptionChange={(value) => handleFieldChange("description", value)}
+          onPriceChange={(value) => handleFieldChange("basePrice", value)}
+          defaultProcessor={formState.specs.defaultSpecs.processor}
+          defaultRam={formState.specs.defaultSpecs.ram}
+          defaultStorage={formState.specs.defaultSpecs.storage}
+          onDefaultProcessorChange={(value: string) => handleDefaultSpecChange("processor", value)}
+          onDefaultRamChange={(value: string) => handleDefaultSpecChange("ram", value)}
+          onDefaultStorageChange={(value: string) => handleDefaultSpecChange("storage", value)}
+          processorOptions={formState.options.processor.map(p => p.model)}
+          ramOptions={formState.options.ram.map(r => r.size)}
+          storageOptions={formState.options.storage.map(s => s.type)}
         />
         <ImageUploader
           publicId={publicId}
           setPublicId={setPublicId}
-          // image={formState.image}
           onImageChange={() => setPublicId("")}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SoftwareOptionsCard
+          softwareOptions={formState.options.software}
+          onAddOption={handleAddSoftwareOption}
+          onRemoveOption={handleRemoveSoftwareOption}
+          onOptionChange={handleSoftwareOptionChange}
+        />
+
         <CpuOptionsCard
-          cpuOptions={formState.cpuOptions}
+          cpuOptions={formState.options.processor}
           onAddOption={handleAddCpuOption}
-          onRemoveOption={handleRemoveCpuOption as any}
-          onOptionChange={handleCpuOptionChange as any}
+          onRemoveOption={handleRemoveCpuOption}
+          onOptionChange={handleCpuOptionChange}
         />
 
         <RamOptionsCard
-          ramOptions={formState.ramOptions}
+          ramOptions={formState.options.ram}
           onAddOption={handleAddRamOption}
           onRemoveOption={handleRemoveRamOption}
           onOptionChange={handleRamOptionChange}
         />
 
         <StorageOptionsCard
-          storageOptions={formState.storageOptions}
+          storageOptions={formState.options.storage}
           onAddOption={handleAddStorageOption}
           onRemoveOption={handleRemoveStorageOption}
           onOptionChange={handleStorageOptionChange}
@@ -279,7 +365,7 @@ export function ProductForm({ editMode = false, productId }: ProductFormProps) {
         >
           Cancel
         </Button>
-        <Button  type="submit" >
+        <Button type="submit">
           {editMode ? "Update Product" : "Create Product"}
         </Button>
       </div>

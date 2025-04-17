@@ -41,7 +41,7 @@ export default function Benefits() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Benefits of Choosing NODEHUB
+            Benefits of Choosing NODEFORGE
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Experience the advantages of running your Ethereum node with our solutions

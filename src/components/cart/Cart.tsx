@@ -12,7 +12,7 @@ export default function Cart() {
     clearCart();
     // Optional: Add confirmation toast/message
   };
-
+  console.log(items)
   return (
     <>
       <button

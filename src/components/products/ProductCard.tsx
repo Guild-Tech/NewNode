@@ -14,13 +14,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
-import { Product, useProducts } from "../../context/ProductContext";
+import { useProducts } from "../../context/ProductContext";
 import { cn } from "../../utils/utils";
 // import { AdvancedImage, placeholder, responsive } from "@cloudinary/react";
 import Cloudnary from "../cloudnary/Cloudnary";
 
 type ProductCardProps = {
-  product: Product;
+  product: any;
   className?: string;
 };
 
@@ -29,10 +29,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const { deleteProduct } = useProducts();
 
   const handleDelete = () => {
-    deleteProduct(product.id);
+    deleteProduct(product._id);
     setShowDeleteDialog(false);
   };
-
+  // console.log(product?._id)
   return (
     <>
       <Card className={cn("overflow-hidden transition-all duration-300 hover:shadow-md group", className)}>
@@ -55,28 +55,29 @@ export function ProductCard({ product, className }: ProductCardProps) {
               </p>
             </div>
             <div className="bg-primary px-2 py-1 rounded-full text-xs font-medium">
-              ${product.price}
+              ${product.basePrice}
             </div>
           </div>
           
           <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
             <div className="flex flex-col">
               <span className="text-muted-foreground">CPU Options</span>
-              <span className="font-medium">{(product.cpuOptions?.length || 3)}</span>
+              <span className="font-medium">{(product?.options?.processor.length || 3)}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground">RAM Options</span>
-              <span className="font-medium">{product.ramOptions?.length || 3}</span>
+              <span className="font-medium">{product?.options?.ram.length || 3}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground">Storage</span>
-              <span className="font-medium">{product.storageOptions?.length || 3}</span>
+              <span className="font-medium">{product?.options?.storage.length || 3}</span>
             </div>
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex gap-2">
           <Button asChild variant="outline" size="sm" className="flex-1">
-            <Link to={`/products/edit/${product.id}`}>
+            <Link to={`/products/edit/${product._id}`}>
+            
               <Pencil className="h-4 w-4 mr-2" />
               Edit
             </Link>

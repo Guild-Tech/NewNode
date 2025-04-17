@@ -1,22 +1,16 @@
 import { Settings, HardDrive, Cpu } from 'lucide-react';
 import { NodeConfig } from '../../types';
-import { 
-  SUPPORTED_NODE_SOFTWARE,
-  RAM_OPTIONS,
-  STORAGE_OPTIONS,
-  PROCESSOR_OPTIONS
-} from '../../config/constants';
 
 interface ProductOptionsProps {
   config: NodeConfig;
   onChange: (config: NodeConfig) => void;
+  options: any
 }
 
-export default function ProductOptions({ config, onChange }: ProductOptionsProps) {
+export default function ProductOptions({ config, onChange, options}: ProductOptionsProps) {
   const handleChange = (key: keyof NodeConfig, value: string) => {
     onChange({ ...config, [key]: value });
   };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-2">
@@ -26,8 +20,8 @@ export default function ProductOptions({ config, onChange }: ProductOptionsProps
           onChange={(e) => handleChange('software', e.target.value)}
           className="flex-1 rounded border-gray-300 focus:border-green-500 focus:ring-green-500"
         >
-          {SUPPORTED_NODE_SOFTWARE.map(software => (
-            <option key={software} value={software}>{software}</option>
+          {options?.software.map((software: any) => (
+            <option key={software._id} value={software.name}>{software.name}</option>
           ))}
         </select>
       </div>
@@ -39,10 +33,8 @@ export default function ProductOptions({ config, onChange }: ProductOptionsProps
           onChange={(e) => handleChange('ram', e.target.value)}
           className="flex-1 rounded border-gray-300 focus:border-green-500 focus:ring-green-500"
         >
-          {Object.entries(RAM_OPTIONS).map(([value, { label, price }]) => (
-            <option key={value} value={value}>
-              {label}{price > 0 ? ` (+$${price})` : ''}
-            </option>
+          {options?.ram.map((ram: any) => (
+            <option key={ram._id} value={ram.size}>{ram?.size} {ram?.price > 0 ? ` (+$ ${ram?.price})` : ''}</option>
           ))}
         </select>
       </div>
@@ -54,10 +46,8 @@ export default function ProductOptions({ config, onChange }: ProductOptionsProps
           onChange={(e) => handleChange('storage', e.target.value)}
           className="flex-1 rounded border-gray-300 focus:border-green-500 focus:ring-green-500"
         >
-          {Object.entries(STORAGE_OPTIONS).map(([value, { label, price }]) => (
-            <option key={value} value={value}>
-              {label}{price > 0 ? ` (+$${price})` : ''}
-            </option>
+          {options?.storage.map((storage: any) => (
+            <option key={storage._id} value={storage.type}>{storage?.type} {storage?.price > 0 ? ` (+$ ${storage?.price})` : ''}</option>
           ))}
         </select>
       </div>
@@ -69,10 +59,8 @@ export default function ProductOptions({ config, onChange }: ProductOptionsProps
           onChange={(e) => handleChange('processor', e.target.value)}
           className="flex-1 rounded border-gray-300 focus:border-green-500 focus:ring-green-500"
         >
-          {Object.entries(PROCESSOR_OPTIONS).map(([value, { label, price }]) => (
-            <option key={value} value={value}>
-              {label}{price > 0 ? ` (+$${price})` : ''}
-            </option>
+          {options?.processor.map((processor: any) => (
+            <option key={processor._id} value={processor.model}>{processor?.model} {processor?.price > 0 ? ` (+$ ${processor?.price})` : ''}</option>
           ))}
         </select>
       </div>

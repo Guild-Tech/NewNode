@@ -60,7 +60,7 @@ const addProduct = async (req, res) => {
 const editProduct = async (req, res) => {
   try {
     const { id } = req.params; // Get custom product ID
-    const updatedProduct = await Product.findOneAndUpdate({ id }, req.body, { new: true });
+    const updatedProduct = await Product.findByIdAndUpdate(id , req.body, { new: true });
 
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
@@ -77,7 +77,7 @@ const editProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params; // Get custom product ID
-    const deletedProduct = await Product.findOneAndDelete({ id });
+    const deletedProduct = await Product.findByIdAndDelete( id );
 
     if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });

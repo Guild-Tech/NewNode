@@ -21,12 +21,12 @@ export default function CartItem({ item, onRemove, onIncrement, onDecrement }: C
         <div className="flex-1">
           <div className="flex justify-between">
             <div>
-              <h3 className="font-semibold">{item.name}</h3>
+              <h3 className="font-semibold">{item?.name}</h3>
               <p className="text-sm text-gray-600 mt-1">
-                {item.config.software} • {item.config.ram} RAM • {item.config.storage} • {item.config.processor}
+                {item?.config.software} • {item?.config.ram} RAM • {item?.config.storage} • {item?.config.processor}
               </p>
             </div>
-            <p className="font-bold">${item.totalPrice.toFixed(2)}</p>
+            <p className="font-bold">${item?.totalPrice?.toFixed(2)}</p>
           </div>
           
           {/* Quantity Controls */}

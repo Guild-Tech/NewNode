@@ -24,7 +24,7 @@ import { DashboardLayout } from "../../components/layout/Dashboard";
 const PAGE_SIZE = 20;
 
 export default function Orders() {
-  const { orders } = useOrders();
+  const { orders, fetchOrders } = useOrders();
   const [currentPage, setCurrentPage] = useState(1);
 
   // Calculate paginated orders
@@ -35,11 +35,15 @@ export default function Orders() {
 
   const totalPages = Math.ceil(orders.length / PAGE_SIZE);
 
+  // Handle status update success
+  const handleStatusUpdate = () => {
+    fetchOrders(); // Refresh orders after status update
+  };
+
   return (
     <DashboardLayout>
       {/* Main content area */}
       <div className="flex-1 overflow-x-auto">
-
         <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-full mx-auto">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">Orders</h1>
@@ -61,46 +65,48 @@ export default function Orders() {
                         <TableHead>Date</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Payment</TableHead>
                         <TableHead>Update Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {paginatedOrders.map((order) => (
-                        <TableRow key={order.orderID}>
+                        <TableRow key={order._id}>
                           <TableCell className="font-medium">
                             #{order.orderID}
                           </TableCell>
                           <TableCell>
                             <div>
-                              {order.shippingInfo?.firstName
-                                ? `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}`
-                                : "N/A"}
+                              {order.customer.firstName} {order.customer.lastName}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {order.shippingInfo?.email || "No Email"}
+                              {order.customer.email}
                             </div>
                           </TableCell>
                           <TableCell>
-                            {order.createdAt
-                              ? format(new Date(order.createdAt), "MMM dd, yyyy")
-                              : "N/A"}
+                            {format(new Date(order.createdAt), "MMM dd, yyyy")}
                           </TableCell>
                           <TableCell>
-                            ${order.totalPrice?.toFixed(2) || "0.00"}
+                            ${order.totalPrice.toFixed(2)}
                           </TableCell>
                           <TableCell>
                             <OrderStatusBadge status={order.orderStatus} />
                           </TableCell>
                           <TableCell>
+                            {order.paymentMethod} ({order.paymentStatus})
+                          </TableCell>
+                          <TableCell>
                             <OrderStatusSelect
                               orderId={order._id}
                               currentStatus={order.orderStatus}
+                              onUpdateSuccess={handleStatusUpdate}
                             />
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
+                  
                   {/* Pagination controls */}
                   {totalPages > 1 && (
                     <div className="flex items-center justify-between mt-4">

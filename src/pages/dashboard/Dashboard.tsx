@@ -31,16 +31,18 @@ const Dashboard = () => {
   const latestProducts = products?.slice(0, 3) || [];
   const totalProducts = products?.length || 0;
   const averagePrice = totalProducts
-    ? products.reduce((sum, product) => sum + (product.price || 0), 0) / totalProducts
+    ? products.reduce((sum, product:any) => sum + (product.price || 0), 0) / totalProducts
     : 0;
   const totalOptions = products?.reduce(
-    (sum, product) =>
+    (sum, product:any) =>
       sum +
       (product.specs?.processor?.length || 0) +
       (product.specs?.ram?.length || 0) +
       (product.specs?.storage?.length || 0),
     0
   );
+
+
 
   return (
     <DashboardLayout>
@@ -97,7 +99,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {products.reduce((sum, p) => sum + (p.specs?.processor?.length || 0), 0)}
+                {products.reduce((sum, p:any) => sum + (p.specs?.processor?.length || 0), 0)}
               </div>
             </CardContent>
           </Card>
@@ -114,8 +116,8 @@ const Dashboard = () => {
 
           {latestProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {latestProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {latestProducts.map((product: any) => (
+                <ProductCard key={product?._id} product={product} />
               ))}
             </div>
           ) : (

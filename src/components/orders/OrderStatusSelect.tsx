@@ -11,6 +11,7 @@ import { OrderStatus, useOrders } from "../../context/OrderContext";
 type OrderStatusSelectProps = {
   orderId: string;
   currentStatus: OrderStatus;
+  onUpdateSuccess: () => void; // Callback to refresh orders
 };
 
 export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectProps) {
@@ -41,7 +42,7 @@ export function OrderStatusSelect({ orderId, currentStatus }: OrderStatusSelectP
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select status">{selectedStatus}</SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-white">
         <SelectItem value="pending">Pending</SelectItem>
         <SelectItem value="processing">Processing</SelectItem>
         <SelectItem value="shipped">Shipped</SelectItem>

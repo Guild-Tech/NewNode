@@ -1,4 +1,3 @@
-
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../../components/ui/card";
@@ -10,13 +9,13 @@ import {
   SelectValue,
 } from "../../../components/ui/select";
 import { Trash2, Plus, HardDrive } from "lucide-react";
-import { Storage } from "../../../context/ProductContext";
+import { StorageOption } from "../../../context/ProductContext";
 
 type StorageOptionsCardProps = {
-  storageOptions: Storage[];
+  storageOptions: StorageOption[];
   onAddOption: () => void;
-  onRemoveOption: (id: string) => void;
-  onOptionChange: (id: string, field: keyof Storage, value: string) => void;
+  onRemoveOption: (index: number) => void;
+  onOptionChange: (index: number, field: keyof StorageOption, value: string) => void;
 };
 
 export function StorageOptionsCard({ 
@@ -46,33 +45,28 @@ export function StorageOptionsCard({
         </Button>
       </CardHeader>
       <CardContent className="space-y-4 pt-3">
-        {storageOptions.map((option: any) => (
-          <div key={option.id} className="grid grid-cols-[1fr,auto] gap-2">
-            <div className="grid grid-cols-3 gap-2">
+        {storageOptions.map((option, index) => (
+          <div key={index} className="grid grid-cols-[1fr,auto] gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Select 
                 value={option.type} 
-                onValueChange={(value) => onOptionChange(option.id as any, 'type', value)}
+                onValueChange={(value) => onOptionChange(index, 'type', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SSD">SSD</SelectItem>
-                  <SelectItem value="HDD">HDD</SelectItem>
-                  <SelectItem value="NVMe">NVMe</SelectItem>
+                <SelectContent className="bg-white">
+                  <SelectItem value="2TB SSD">2TB SSD</SelectItem>
+                  <SelectItem value="4TB SSD">4TB SSD</SelectItem>
                 </SelectContent>
               </Select>
               <Input
-                placeholder="Size"
-                value={option.size}
-                onChange={(e) => onOptionChange(option.id as any, 'size', e.target.value)}
-              />
-              <Input
                 type="number"
-                placeholder="Price"
+                placeholder="Price ($)"
                 value={option.price}
                 min="0"
-                onChange={(e) => onOptionChange(option.id as any, 'price', e.target.value)}
+                step="10"
+                onChange={(e) => onOptionChange(index, 'price', e.target.value)}
               />
             </div>
             {storageOptions.length > 1 && (
@@ -80,7 +74,7 @@ export function StorageOptionsCard({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => onRemoveOption(option.id as any)}
+                onClick={() => onRemoveOption(index)}
                 className="h-10 w-10 text-red-500 hover:text-red-600 hover:bg-red-50"
               >
                 <Trash2 className="h-4 w-4" />

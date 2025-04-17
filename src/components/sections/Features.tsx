@@ -119,11 +119,11 @@ export default function Features() {
               className="group bg-gray-800 p-8 rounded-xl hover:bg-gray-700 
                        transition-all duration-300 transform hover:-translate-y-1"
             >
-              <div className={`bg-${feature.color}-500/10 w-16 h-16 rounded-xl 
+              <div className={`bg-green-500/10 w-16 h-16 rounded-xl 
                             flex items-center justify-center mb-6 
                             group-hover:scale-110 transition-transform`}
               >
-                <feature.icon className={`h-8 w-8 text-${feature.color}-400`} />
+                <feature.icon className={`h-8 w-8 text-green-400`} />
               </div>
               <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
               <p className="text-gray-400">{feature.description}</p>

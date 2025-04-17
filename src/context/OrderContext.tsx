@@ -1,50 +1,86 @@
-import  { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from 'sonner';
 import axios from 'axios';
 
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+export type PaymentMethod = 'credit_card' | 'paypal' | 'crypto' | 'bank_transfer';
 
-export type OrderItem = {
+export type OrderProduct = {
   productId: string;
+  name: string;
   quantity: number;
-  selectedCpu?: string;
-  selectedRam?: string;
-  selectedStorage?: string;
-  price: number;
+  basePrice: number;
+  configuration: {
+    ram?: {
+      size: string;
+      price: number;
+    };
+    processor?: {
+      model: string;
+      price: number;
+    };
+    storage?: {
+      type: string;
+      price: number;
+    };
+  };
 };
 
-export type Order = {
+export type OrderItem = {
   _id: string;
   orderID: string;
-  order_description?: string;
-  shippingInfo: {
+  customer: {
     firstName: string;
     lastName: string;
     email: string;
-    phone: string;
+  };
+  shippingInfo: {
     address: string;
     city: string;
     state: string;
     zipCode: string;
     country: string;
   };
+  billingInfo: {
+    sameAsShipping: boolean;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+  products: OrderProduct[];
+  subtotal: number;
+  shippingCost: number;
+  tax: number;
+  discount: number;
   totalPrice: number;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
-  warranty?: string;
-  shippingPolicy?: string;
-  customerSupport?: string;
-  stripe_session_id?: string;
   createdAt: string;
   updatedAt: string;
+  __v?: number;
+};
+
+export type OrdersResponse = {
+  success: boolean;
+  count: number;
+  total: number;
+  page: number;
+  pages: number;
+  orders: OrderItem[];
 };
 
 type OrderContextType = {
-  orders: Order[];
-  addOrder: (order: Omit<Order, '_id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  updateOrder: (id: string, updates: Partial<Order>) => Promise<void>;
+  orders: OrderItem[];
+  addOrder: (order: Omit<OrderItem, '_id' | 'createdAt' | 'updatedAt' | '__v'>) => Promise<void>;
+  updateOrder: (id: string, updates: Partial<OrderItem>) => Promise<void>;
   updateOrderStatus: (id: string, status: OrderStatus) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
-  getOrder: (id: string) => Order | undefined;
+  getOrder: (id: string) => OrderItem | undefined;
+  fetchOrders: () => Promise<void>;
 };
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -58,59 +94,68 @@ export const useOrders = () => {
 };
 
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderItem[]>([]);
 
-  // Fetch orders from the backend
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get<OrdersResponse>(`${import.meta.env.VITE_API_URL}/orders`);
+      setOrders(response.data.orders);
+    } catch (error) {
+      toast.error('Failed to fetch orders');
+      console.error('Error fetching orders:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/orders`);
-        setOrders(response.data);
-      } catch (error) {
-        toast.error('Failed to fetch orders');
-      }
-    };
     fetchOrders();
   }, []);
 
-  // Add a new order
-  const addOrder = async (order: Omit<Order, '_id' | 'createdAt' | 'updatedAt'>) => {
+  const addOrder = async (order: Omit<OrderItem, '_id' | 'createdAt' | 'updatedAt' | '__v'>) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/order`, order);
+      const response = await axios.post<{ order: OrderItem }>(
+        `${import.meta.env.VITE_API_URL}/orders`,
+        order
+      );
       setOrders((prevOrders) => [...prevOrders, response.data.order]);
       toast.success('Order added successfully');
     } catch (error) {
       toast.error('Failed to add order');
+      console.error('Error adding order:', error);
     }
   };
 
-  // Update an order
-  const updateOrder = async (id: string, updates: Partial<Order>) => {
+  const updateOrder = async (id: string, updates: Partial<OrderItem>) => {
     try {
-      const response = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}`, updates);
+      const response = await axios.put<{ order: OrderItem }>(
+        `${import.meta.env.VITE_API_URL}/orders/${id}`,
+        updates
+      );
       setOrders((prevOrders) =>
         prevOrders.map((order) => (order._id === id ? response.data.order : order))
       );
       toast.success('Order updated successfully');
     } catch (error) {
       toast.error('Failed to update order');
+      console.error('Error updating order:', error);
     }
   };
 
-  // Update order status
   const updateOrderStatus = async (id: string, status: OrderStatus) => {
     try {
-      const response = await axios.put(`${import.meta.env.VITE_API_URL}/orders/${id}/status`, { orderStatus: status }); 
+      const response = await axios.put<{ order: OrderItem }>(
+        `${import.meta.env.VITE_API_URL}/orders/${id}/status`,
+        { orderStatus: status }
+      );
       setOrders((prevOrders) =>
         prevOrders.map((order) => (order._id === id ? response.data.order : order))
       );
       toast.success(`Order status updated to ${status}`);
     } catch (error) {
       toast.error('Failed to update order status');
+      console.error('Error updating order status:', error);
     }
   };
 
-  // Delete an order
   const deleteOrder = async (id: string) => {
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/orders/${id}`);
@@ -118,17 +163,25 @@ export const OrderProvider = ({ children }: { children: ReactNode }) => {
       toast.success('Order deleted successfully');
     } catch (error) {
       toast.error('Failed to delete order');
+      console.error('Error deleting order:', error);
     }
   };
 
-  // Get a single order
   const getOrder = (id: string) => {
     return orders.find((order) => order._id === id);
   };
 
   return (
     <OrderContext.Provider
-      value={{ orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, getOrder }}
+      value={{
+        orders,
+        addOrder,
+        updateOrder,
+        updateOrderStatus,
+        deleteOrder,
+        getOrder,
+        fetchOrders
+      }}
     >
       {children}
     </OrderContext.Provider>

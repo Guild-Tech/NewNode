@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem, Product, NodeConfig } from '../types';
-import { calculatePrice } from '../utils/price';
+import { calculateTotalPrice } from '../utils/calculateTotalPrice';
 
 interface CartStore {
   items: CartItem[];
@@ -35,15 +35,15 @@ export const useCartStore = create<CartStore>()(
                   ? { 
                       ...item, 
                       quantity: item.quantity + 1,
-                      totalPrice: calculatePrice(product.price, config) * (item.quantity + 1)
+                      totalPrice: calculateTotalPrice(product as any, config) * (item.quantity + 1)
                     }
                   : item
               ),
             };
           }
 
-          const price = calculatePrice(product.price, config);
-
+          // const price = calculatePrice(product.basePrice, config);
+          const price = calculateTotalPrice(product as any, config);
           return {
             items: [
               ...state.items,
@@ -74,7 +74,7 @@ export const useCartStore = create<CartStore>()(
               return {
                 ...item,
                 quantity: newQuantity,
-                totalPrice: calculatePrice(item.price, item.config) * newQuantity
+                totalPrice: calculateTotalPrice(item as any, item.config) * newQuantity
               };
             }
             return item;
@@ -92,7 +92,7 @@ export const useCartStore = create<CartStore>()(
                 return {
                   ...item,
                   quantity: newQuantity,
-                  totalPrice: calculatePrice(item.price, item.config) * newQuantity
+                  totalPrice: calculateTotalPrice(item as any, item.config) * newQuantity
                 };
               }
               return item;
